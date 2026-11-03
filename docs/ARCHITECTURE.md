@@ -1,0 +1,35 @@
+# Architecture
+
+## Overview
+
+Panjab 117 is a server-first Next.js App Router application. The current phase is intentionally static: it publishes an accessible multilingual homepage without collecting data or connecting to privileged systems.
+
+## Source organization
+
+```text
+src/
+├── app/[locale]/       Locale-aware layouts and pages
+├── components/         Reusable presentation and navigation components
+├── lib/                Locale rules and translation dictionaries
+└── proxy.ts            Default-locale redirect and route normalization
+```
+
+Most components render on the server. `LanguageSelector` is the only client component because it reads the current pathname and performs in-place locale navigation.
+
+## Routing and internationalization
+
+Every public page is prefixed by one of the supported locales: `en`, `pa` or `hi`. The proxy redirects unprefixed requests to English. The dynamic locale root layout validates the route, sets the document `lang` attribute and supplies localized metadata. Translation dictionaries are typed so missing keys fail during development, and a test verifies their runtime alignment.
+
+Fonts use Unicode-capable local system stacks. This avoids a third-party font request and keeps the initial build deployable without a font service. A later brand phase may self-host approved Gurmukhi and Devanagari font files.
+
+## Styling and accessibility
+
+Tailwind CSS provides layout and component utilities; a small global stylesheet defines typography, reusable buttons, the skip link and reduced-motion behavior. Semantic landmarks, heading order, visible keyboard focus, minimum control sizes and high-contrast colors are built into the initial components.
+
+## Security boundary
+
+This frontend has no database, API mutation routes, identity system, payments, survey form or admin surface. Basic response headers reduce framing, MIME-sniffing and unnecessary browser capabilities. Secrets must stay in server-only environment variables in future phases; anything prefixed with `NEXT_PUBLIC_` is public by design.
+
+## Quality pipeline
+
+Pull requests and pushes to `main` run formatting checks, ESLint, strict TypeScript, Vitest and a production build. The same commands are available locally through npm scripts.
