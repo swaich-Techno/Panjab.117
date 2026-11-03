@@ -51,6 +51,12 @@ Step 2B must turn mitigations into traceable tests: SAST/dependency audit; SQL i
 
 Step 2B completed local synthetic tests for composite database authorization boundaries, cross-role denials, envelope tampering, key-purpose/owner separation, nonce uniqueness sampling, KEK rotation/recovery, schema constraints, transaction rollback, immutable versions, independently encrypted backup corruption, restore, and deletion-ledger replay. Cloud/network/TLS, cache, real IdP, OCI IAM/Vault, dependency provenance, load, logging pipeline, and tabletop exercises remain open because no infrastructure was provisioned.
 
+Step 4A adds the focused survey-intake analysis in
+[`STEP_4A_INTAKE_THREAT_MODEL.md`](STEP_4A_INTAKE_THREAT_MODEL.md), including
+consent manipulation, keyed duplicate signals, atomic concurrency, withdrawal,
+complementary statistical suppression and the blockers that keep production
+intake disabled.
+
 ## Accepted limitations
 
 Free-tier single-node failure, no PITR, no SLA, and capacity uncertainty remain High availability/recovery risks. They cannot be reduced by application code. Confidential production collection requires an explicit owner-signed risk acceptance or migration to paid HA, longer backups/PITR, monitoring, and support.

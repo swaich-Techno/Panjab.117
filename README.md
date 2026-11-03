@@ -8,11 +8,16 @@ Panjab 117 is an independent multilingual civic research platform covering all 1
 - Responsive, accessible editorial homepage
 - Provisional Majha, Malwa, Doaba and Puadh discovery directories, clearly separated from official election boundaries
 - Source-attributed Fatehgarh Sahib parliamentary-to-Assembly mapping
-- Disabled survey schedule, duplicate-screening, editorial-assistance and deterministic-statistics interfaces
+- Disabled survey schedule plus a multilingual, in-memory Step 4A questionnaire and consent preview
+- Synthetic withdrawal, keyed duplicate-screening and disclosure-control interfaces
 - Strict TypeScript, Tailwind CSS, ESLint, Prettier and Vitest
 - Automated GitHub quality checks
 
 No survey submissions, authentication, production database access, payments or administrative tools are implemented. Cultural-region assignments require human review and are not presented as official classifications.
+
+The Step 4A questionnaire and consent translations are drafts requiring native
+linguistic and legal review. The proposed survey dates do not override any
+security, privacy, consent, backup or operational gate.
 
 ## Requirements
 
@@ -44,3 +49,7 @@ Copy `.env.example` to `.env.local` only when local configuration becomes necess
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Engineering decisions](docs/DECISIONS.md)
+- [Step 4A questionnaire specification](docs/data/STEP_4A_QUESTIONNAIRE_SPECIFICATION.md)
+- [Step 4A consent and withdrawal design](docs/security/STEP_4A_CONSENT_WITHDRAWAL.md)
+- [Step 4A intake threat model](docs/security/STEP_4A_INTAKE_THREAT_MODEL.md)
+- [Step 4A production gaps](docs/architecture/STEP_4A_PRODUCTION_GAPS.md)

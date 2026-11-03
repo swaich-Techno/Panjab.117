@@ -3,8 +3,18 @@ import { notFound } from "next/navigation";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import {
+  SurveyPreview,
+  type LocalizedPreviewQuestion,
+} from "@/components/survey-preview";
 import { isLocale } from "@/lib/i18n";
 import { getRegionalDictionary } from "@/lib/regional-translations";
+import { CONSENT_NOTICE_VERSION, getConsentNotice } from "@/lib/survey/consent";
+import { surveyPreviewCopy } from "@/lib/survey/preview-translations";
+import {
+  fatehgarhSahibQuestionnaire,
+  QUESTIONNAIRE_VERSION,
+} from "@/lib/survey/questionnaire";
 import {
   fatehgarhSahibDraftSchedule,
   getSurveyAvailability,
@@ -24,6 +34,20 @@ export default async function SurveyPreviewPage({ params }: PageProps) {
     fatehgarhSahibDraftSchedule,
     new Date(),
   );
+  const localizedQuestions: LocalizedPreviewQuestion[] =
+    fatehgarhSahibQuestionnaire.questions.map((question) => ({
+      id: question.id,
+      prompt: question.prompt[locale],
+      helpText: "helpText" in question ? question.helpText[locale] : undefined,
+      responseType: question.responseType,
+      required: question.required,
+      politicalOpinion: question.politicalOpinion,
+      options: question.options.map((option) => ({
+        id: option.id,
+        label: option.label[locale],
+      })),
+    }));
+  const notice = getConsentNotice(locale);
 
   return (
     <>
@@ -107,6 +131,13 @@ export default async function SurveyPreviewPage({ params }: PageProps) {
               {t.noIntake}
             </p>
           </div>
+          <SurveyPreview
+            consent={notice}
+            consentVersion={CONSENT_NOTICE_VERSION}
+            copy={surveyPreviewCopy[locale]}
+            questionnaireVersion={QUESTIONNAIRE_VERSION}
+            questions={localizedQuestions}
+          />
         </section>
       </main>
       <SiteFooter dictionary={base} />
