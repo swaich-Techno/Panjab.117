@@ -40,6 +40,10 @@ Cloudflare's Free plan is not an origin-hosting service and does not make OCI My
 
 Always Free is suitable for schema development, security prototyping, synthetic-data tests, and a low-volume public-content pilot. It is **not by itself suitable for highly confidential production surveys** because it lacks HA, PITR, long native backup retention, SLA, and support. Collection of confidential data must remain disabled until independent restoration has passed, monitoring is operational, legal/privacy review is complete, and an incident-funded upgrade path exists.
 
+## Step 2B compatibility baseline
+
+The corrected schema executed successfully on official MySQL Community Server 8.4.13 LTS. Oracle's release notes list 8.4.13 as supported by HeatWave as of 2026-10-20, but the service can create/upgrade Always Free systems on its current default/latest line. MySQL 8.4 validation therefore does not guarantee compatibility with the exact future HeatWave instance. Before provisioning, record the service version and re-run the schema, grants, triggers, dump, and restore suite against that exact version.
+
 ## Official sources
 
 - [Oracle: Features of MySQL HeatWave Service](https://docs.oracle.com/en-us/iaas/mysql-database/doc/features-mysql-heatwave-service.html) — availability, 50 GiB storage, backups, HA/read-replica/PITR exclusions, TLS, encryption, IAM, audit, support.

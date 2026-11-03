@@ -36,7 +36,7 @@ Current gaps are intentional for Step 1 but block confidential data: no identity
 
 ### D5 — External identity provider with phishing-resistant MFA
 
-**Decision:** Do not build password authentication in this step. Select an identity provider in Step 2B, require MFA for all administrators, prefer WebAuthn/FIDO2, and map stable subjects to server-side RBAC. Argon2id is reserved for any later approved local credential/recovery verifier.
+**Decision:** Do not build password authentication in this proof of concept. Select an identity provider in a later approved phase, require MFA for all administrators, prefer WebAuthn/FIDO2, and map stable subjects to server-side RBAC. Argon2id is reserved for any later approved local credential/recovery verifier.
 
 ### D6 — Immutable version and approval workflows
 

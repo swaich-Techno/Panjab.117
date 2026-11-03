@@ -49,6 +49,8 @@ Risk scale combines likelihood and impact: Critical, High, Medium, Low. Residual
 
 Step 2B must turn mitigations into traceable tests: SAST/dependency audit; SQL injection corpus; object-level authorization matrix; two-user cache poisoning test; external port scan; TLS failure tests; key-policy denial tests; logging canaries; bulk-export/insider simulations; backup corruption and isolated restore; destructive-credential test; and tabletop exercises for administrator compromise, ransomware, and respondent deletion.
 
+Step 2B completed local synthetic tests for composite database authorization boundaries, cross-role denials, envelope tampering, key-purpose/owner separation, nonce uniqueness sampling, KEK rotation/recovery, schema constraints, transaction rollback, immutable versions, independently encrypted backup corruption, restore, and deletion-ledger replay. Cloud/network/TLS, cache, real IdP, OCI IAM/Vault, dependency provenance, load, logging pipeline, and tabletop exercises remain open because no infrastructure was provisioned.
+
 ## Accepted limitations
 
 Free-tier single-node failure, no PITR, no SLA, and capacity uncertainty remain High availability/recovery risks. They cannot be reduced by application code. Confidential production collection requires an explicit owner-signed risk acceptance or migration to paid HA, longer backups/PITR, monitoring, and support.

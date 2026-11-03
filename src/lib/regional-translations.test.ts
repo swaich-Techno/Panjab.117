@@ -1,0 +1,24 @@
+import { describe, expect, it } from "vitest";
+
+import { regions } from "../data/constituencies";
+
+import { locales } from "./i18n";
+import { regionalDictionaries } from "./regional-translations";
+
+describe("regional translations", () => {
+  it.each(locales)("provides complete regional labels for %s", (locale) => {
+    const dictionary = regionalDictionaries[locale];
+    expect(Object.keys(dictionary.regions).sort()).toEqual([...regions].sort());
+    expect(dictionary.classificationNotice.length).toBeGreaterThan(40);
+    expect(dictionary.noIntake.length).toBeGreaterThan(40);
+  });
+
+  it("uses native Unicode scripts for Punjabi and Hindi", () => {
+    expect(regionalDictionaries.pa.regions.majha.name).toMatch(
+      /[\u0A00-\u0A7F]/u,
+    );
+    expect(regionalDictionaries.hi.regions.majha.name).toMatch(
+      /[\u0900-\u097F]/u,
+    );
+  });
+});

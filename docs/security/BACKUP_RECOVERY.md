@@ -1,6 +1,6 @@
 # Backup, recovery, and disaster plan
 
-Status: proposed runbook. No backup has been created or restored; recovery is **not operationally proven**.
+Status: proposed production runbook with one disposable synthetic MySQL restore exercise. Production recovery remains **not operationally proven**.
 
 ## Service limitation
 
@@ -66,6 +66,12 @@ Quarterly, and before confidential launch or material schema/key change:
 8. Securely destroy the recovery environment and temporary plaintext after approval. Rotate any exposed temporary credentials.
 
 A successful file upload, checksum, or import alone is not a restoration test.
+
+## Step 2B local exercise
+
+On 2026-11-03, the test suite used MySQL Community Server 8.4.13 on loopback with synthetic neutral values only. It performed a `mysqldump --single-transaction --skip-lock-tables --set-gtid-purged=OFF --no-tablespaces` export into memory, independently encrypted/authenticated it with the backup-only hierarchy, verified and decrypted it, dropped only the disposable schemas, restored them, checked for orphaned answers, and replayed an identity-key deletion ledger. A deliberately corrupted artifact and a mismatched ledger were rejected by unit tests.
+
+The final measured tiny-fixture restore was 1846.18 ms on this workstation. This is reproducibility evidence, not a production RTO/RPO or capacity result. It did not test OCI Object Storage, Vault, network interruption, large datasets, cross-region recovery, operator approval, or provider failure.
 
 ## Disaster runbook
 

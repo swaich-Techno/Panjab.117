@@ -19,14 +19,14 @@ export function SiteHeader({ dictionary: t, locale }: SiteHeaderProps) {
   ] as const;
 
   return (
-    <header className="border-b border-stone-200 bg-[#fbfaf6]/95">
+    <header className="border-b border-[#d8c9a5] bg-[#f8f4e9]/95">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-12">
         <Link
-          className="rounded-sm font-serif text-xl font-bold tracking-tight text-stone-950 outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-4"
+          className="rounded-sm font-serif text-xl font-bold tracking-tight text-[#0d2137] outline-none focus-visible:ring-2 focus-visible:ring-[#b08d46] focus-visible:ring-offset-4"
           href={`/${locale}`}
         >
           {t.siteName}
-          <span className="ml-2 inline-block h-2 w-2 rounded-full bg-amber-500" />
+          <span className="ml-2 inline-block h-2 w-2 rounded-full bg-[#b08d46]" />
         </Link>
         <div className="flex items-center gap-4">
           <nav aria-label={t.navigationLabel} className="hidden lg:block">

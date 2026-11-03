@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fbfaf6;
-  --foreground: #1c1917;
+  --background: #f8f4e9;
+  --foreground: #0d2137;
 }
 
 * {
@@ -57,14 +57,14 @@ body {
   border-radius: 0.5rem;
   background: #fff;
   padding: 0.75rem 1rem;
-  color: #064e3b;
+  color: #0d2137;
   font-weight: 700;
   box-shadow: 0 8px 30px rgb(0 0 0 / 0.2);
 }
 
 .skip-link:focus {
   transform: translateY(0);
-  outline: 3px solid #047857;
+  outline: 3px solid #b08d46;
   outline-offset: 3px;
 }
 
@@ -87,35 +87,35 @@ body {
 }
 
 .button-primary {
-  background: #065f46;
+  background: #0d2137;
   color: #fff;
 }
 
 .button-primary:hover {
-  background: #064e3b;
+  background: #173a5e;
   transform: translateY(-1px);
 }
 
 .button-secondary {
   border: 1px solid #a8a29e;
   background: transparent;
-  color: #292524;
+  color: #0d2137;
 }
 
 .button-secondary:hover {
-  border-color: #065f46;
-  color: #065f46;
+  border-color: #0d2137;
+  color: #0d2137;
 }
 
 .button-primary:focus-visible,
 .button-secondary:focus-visible {
-  outline: 3px solid #047857;
+  outline: 3px solid #b08d46;
   outline-offset: 3px;
 }
 
 ::selection {
-  background: #fde68a;
-  color: #1c1917;
+  background: #e6c56c;
+  color: #0d2137;
 }
 
 @media (prefers-reduced-motion: reduce) {

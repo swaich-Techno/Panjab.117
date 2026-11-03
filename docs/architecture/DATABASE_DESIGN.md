@@ -1,6 +1,6 @@
 # Database design
 
-Status: logical design only. No database, migration, account, or real record has been created.
+Status: Step 2B proof-of-concept design. The schema has been executed only against a disposable local MySQL 8.4.13 instance with synthetic records. No production database, migration, account, or real record has been created.
 
 ## Design principles
 
@@ -61,12 +61,22 @@ Only an approved, immutable survey version may accept responses. Question change
 
 The ingestion transaction validates the active survey version and consent, creates the response, writes encrypted answers, and appends an audit event. Failure rolls back the full transaction. Idempotency keys are stored as keyed digests with a short expiry to make retries safe without becoming identifiers.
 
+### Step 2B referential-integrity corrections
+
+- `encrypted_answers` now carries `survey_version_id` and has two composite foreign keys: `(response_id, survey_version_id)` to the response and `(question_id, survey_version_id)` to the question. The database therefore rejects an answer whose question belongs to a different survey version, even if application validation fails.
+- Answer and identity keys use separate owner tables and separate wrap tables. Composite `(data_key_id, response_id)` foreign keys prevent one response from using another response's DEK. Generated key-purpose columns link answer wraps only to answer KEKs and identity wraps only to identity KEKs.
+- One active wrap per owned DEK is enforced with a generated nullable slot and a unique index. Rotation adds a new wrap, changes the previous wrap to `decrypt_only`/`retired`, and never changes ciphertext.
+- Active/decrypt-only wraps cannot be deleted until the owner is marked destroyed. Retired wraps can be removed after the approved backup-retention boundary. Identity and answer destruction remain independent.
+- Generic citation, correction, verification, and publication-approval targets were replaced with typed tables and real foreign keys. Audit target IDs remain intentionally opaque so deletion of a business record cannot delete accountability evidence.
+
 ## Identity, authorization, and publication model
 
 - `admin_identities`: external identity-provider subject digest, status, MFA assurance requirement, timestamps. No locally fabricated authentication.
 - `roles`, `permissions`, `role_permissions`, `admin_role_assignments`: normalized RBAC with assignment scope and expiry.
 - `publication_approvals`: content version, approval stage, approver, decision, reason, timestamps; prevent author self-approval for sensitive publication.
-- `audit_events`: event UUID/time, actor reference, role snapshot, action, target type/opaque target ID, outcome, request correlation ID, coarse network digest, redacted metadata, previous hash, event hash. Insert-only application access.
+- Typed report, constituency-content, and survey publication-approval tables replace a polymorphic approval target.
+- `audit_events`: monotonic sequence, event UUID/time, actor reference, role snapshot, action, opaque target ID, outcome, request correlation ID, coarse network digest, redacted metadata, previous hash, and event hash. Insert-only application access.
+- `audit_checkpoints`: a range, count, terminal event hash, external destination/receipt digest, and keyed anchor digest. A checkpoint is not considered anchored until its receipt exists outside MySQL under a separate identity.
 - `encryption_key_versions`: non-secret key alias/OCID digest, purpose, state, activation/retirement dates. It contains no key or plaintext DEK.
 
 ## Indexing and constraints
@@ -74,6 +84,7 @@ The ingestion transaction validates the active survey version and consent, creat
 - Index every FK used for joins or deletion checks.
 - Composite indexes follow access paths: published locale lookup, survey-version status/window, response retention/status, consent response/time, audit time/actor/action.
 - Use `CHECK` constraints for constrained status values and exactly-one-target citation logic, while also validating in application code.
+- Typed citation tables removed the earlier exactly-one-polymorphic-target check; each citation now has a mandatory FK to one target type.
 - Use `utf8mb4` and an appropriate Unicode collation; preserve Punjabi Gurmukhi and Hindi Devanagari exactly. Slugs are separate ASCII identifiers.
 - All timestamps are UTC `TIMESTAMP(6)` or `DATETIME(6)` with explicit application semantics.
 - Large content and ciphertext sizes are bounded at both API and DB layers.
@@ -85,6 +96,7 @@ The ingestion transaction validates the active survey version and consent, creat
 - Publication: immutable version plus two-person approval where required; a view switches to the approved version atomically.
 - Consent withdrawal/deletion: mark workflow, delete optional identity first, delete/cryptographically erase answer material according to policy, retain only minimal non-identifying compliance evidence, and append an audit event.
 - Foreign keys default to `RESTRICT`; privacy deletions use reviewed procedures rather than broad cascades. Narrow child tables may use `CASCADE` only where the parent is the complete lifecycle owner.
+- Database triggers reject content changes or deletion after a version leaves `draft`, and reject question/option changes after a survey is sealed. State transitions still require application workflow policy and approval tests.
 
 ## Capacity considerations
 
@@ -92,4 +104,4 @@ The 50 GiB limit includes data and logs. Ciphertext, authentication metadata, in
 
 ## Draft schema
 
-A non-executable design draft is in [`docs/design/mysql-schema-draft.sql`](../design/mysql-schema-draft.sql). It deliberately omits production credentials, grants containing secrets, migrations, and real constituency/survey data. It must receive DBA, privacy, and application review before conversion to a migration.
+The proof-of-concept schema is in [`docs/design/mysql-schema-draft.sql`](../design/mysql-schema-draft.sql), and exact role grants are in [`docs/design/mysql-grants.sql`](../design/mysql-grants.sql). Both executed successfully on disposable MySQL Community Server 8.4.13. They contain no credentials or real constituency/survey data and are not approved production migrations. HeatWave's exact deployment version, definer ownership, TLS accounts, online migration behavior, and rollback plan require a separate review.

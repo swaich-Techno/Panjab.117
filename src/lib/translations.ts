@@ -62,7 +62,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     heroTitle: "A clearer view of all 117 constituencies.",
     heroBody:
       "Panjab 117 is an independent, multilingual platform being built to make constituency-level civic research easier to find, understand and question.",
-    heroPrimary: "Explore the foundation",
+    heroPrimary: "Explore regions",
     heroSecondary: "Read our approach",
     identityLabel: "Punjab Legislative Assembly",
     identityValue: "117",
@@ -70,10 +70,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     exploreEyebrow: "Constituency exploration",
     exploreTitle: "Local context, organised constituency by constituency.",
     exploreBody:
-      "The future directory will bring verified profiles, public information and original research into one consistent format. No unverified constituency records are published in this foundation phase.",
-    exploreAction: "Directory coming next",
-    exploreNote:
-      "Records will be published only after a documented verification process.",
+      "Browse all 117 official constituency names through a provisional cultural-region index. Regional assignments remain open to documented local review.",
+    exploreAction: "Open the regional directory",
+    exploreNote: "Cultural regions are not official election boundaries.",
     surveyEyebrow: "Upcoming survey",
     surveyTitle: "A public-interest survey is in preparation.",
     surveyBody:
@@ -120,7 +119,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     heroTitle: "ਸਾਰੇ 117 ਵਿਧਾਨ ਸਭਾ ਹਲਕਿਆਂ ਦੀ ਸਪਸ਼ਟ ਤਸਵੀਰ।",
     heroBody:
       "ਪੰਜਾਬ 117 ਇੱਕ ਸੁਤੰਤਰ, ਬਹੁਭਾਸ਼ੀ ਮੰਚ ਹੈ। ਇਸ ਦਾ ਮਕਸਦ ਵਿਧਾਨ ਸਭਾ ਹਲਕਿਆਂ ਬਾਰੇ ਨਾਗਰਿਕ ਖੋਜ ਨੂੰ ਲੱਭਣਾ, ਸਮਝਣਾ ਅਤੇ ਉਸ ਉੱਤੇ ਸਵਾਲ ਕਰਨਾ ਸੌਖਾ ਬਣਾਉਣਾ ਹੈ।",
-    heroPrimary: "ਮੁੱਢਲੀ ਬਣਤਰ ਵੇਖੋ",
+    heroPrimary: "ਖੇਤਰਾਂ ਦੀ ਪੜਚੋਲ ਕਰੋ",
     heroSecondary: "ਸਾਡਾ ਤਰੀਕਾ ਪੜ੍ਹੋ",
     identityLabel: "ਪੰਜਾਬ ਵਿਧਾਨ ਸਭਾ",
     identityValue: "117",
@@ -128,10 +127,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     exploreEyebrow: "ਵਿਧਾਨ ਸਭਾ ਹਲਕਿਆਂ ਦੀ ਪੜਚੋਲ",
     exploreTitle: "ਸਥਾਨਕ ਜਾਣਕਾਰੀ, ਹਰ ਹਲਕੇ ਅਨੁਸਾਰ ਵਿਵਸਥਿਤ।",
     exploreBody:
-      "ਭਵਿੱਖ ਦੀ ਡਾਇਰੈਕਟਰੀ ਵਿੱਚ ਤਸਦੀਕ ਕੀਤੇ ਪ੍ਰੋਫ਼ਾਈਲ, ਜਨਤਕ ਜਾਣਕਾਰੀ ਅਤੇ ਮੂਲ ਖੋਜ ਇੱਕੋ ਢਾਂਚੇ ਵਿੱਚ ਮਿਲਣਗੇ। ਇਸ ਮੁੱਢਲੇ ਪੜਾਅ ਵਿੱਚ ਕੋਈ ਵੀ ਗੈਰ-ਤਸਦੀਕਸ਼ੁਦਾ ਹਲਕਾ ਰਿਕਾਰਡ ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਕੀਤਾ ਗਿਆ।",
-    exploreAction: "ਡਾਇਰੈਕਟਰੀ ਅਗਲੇ ਪੜਾਅ ਵਿੱਚ",
-    exploreNote:
-      "ਰਿਕਾਰਡ ਲਿਖਤੀ ਤਸਦੀਕ ਪ੍ਰਕਿਰਿਆ ਪੂਰੀ ਹੋਣ ਤੋਂ ਬਾਅਦ ਹੀ ਪ੍ਰਕਾਸ਼ਿਤ ਹੋਣਗੇ।",
+      "ਸਾਰੇ 117 ਅਧਿਕਾਰਤ ਹਲਕਿਆਂ ਦੇ ਨਾਂ ਆਰਜ਼ੀ ਸੱਭਿਆਚਾਰਕ ਖੇਤਰੀ ਸੂਚੀ ਰਾਹੀਂ ਵੇਖੋ। ਖੇਤਰੀ ਵੰਡ ਲਿਖਤੀ ਸਥਾਨਕ ਸਮੀਖਿਆ ਲਈ ਖੁੱਲ੍ਹੀ ਹੈ।",
+    exploreAction: "ਖੇਤਰੀ ਡਾਇਰੈਕਟਰੀ ਖੋਲ੍ਹੋ",
+    exploreNote: "ਸੱਭਿਆਚਾਰਕ ਖੇਤਰ ਅਧਿਕਾਰਤ ਚੋਣ ਹੱਦਾਂ ਨਹੀਂ ਹਨ।",
     surveyEyebrow: "ਆਉਣ ਵਾਲਾ ਸਰਵੇਖਣ",
     surveyTitle: "ਜਨਤਕ ਹਿੱਤ ਲਈ ਇੱਕ ਸਰਵੇਖਣ ਤਿਆਰ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ।",
     surveyBody:
@@ -179,7 +177,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     heroTitle: "सभी 117 विधानसभा क्षेत्रों की स्पष्ट तस्वीर।",
     heroBody:
       "पंजाब 117 एक स्वतंत्र, बहुभाषी मंच है। इसका उद्देश्य विधानसभा-स्तरीय नागरिक शोध को खोजना, समझना और उस पर सवाल करना आसान बनाना है।",
-    heroPrimary: "आधारभूत स्वरूप देखें",
+    heroPrimary: "क्षेत्रों को देखें",
     heroSecondary: "हमारा दृष्टिकोण पढ़ें",
     identityLabel: "पंजाब विधानसभा",
     identityValue: "117",
@@ -187,10 +185,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     exploreEyebrow: "विधानसभा क्षेत्रों की जानकारी",
     exploreTitle: "स्थानीय संदर्भ, हर विधानसभा क्षेत्र के अनुसार व्यवस्थित।",
     exploreBody:
-      "भविष्य की निर्देशिका में सत्यापित प्रोफ़ाइल, सार्वजनिक जानकारी और मौलिक शोध एक समान प्रारूप में उपलब्ध होंगे। इस आधारभूत चरण में कोई असत्यापित क्षेत्रीय अभिलेख प्रकाशित नहीं किया गया है।",
-    exploreAction: "निर्देशिका अगले चरण में",
-    exploreNote:
-      "अभिलेख केवल लिखित सत्यापन प्रक्रिया पूरी होने के बाद प्रकाशित किए जाएँगे।",
+      "सभी 117 आधिकारिक विधानसभा क्षेत्र नामों को एक अस्थायी सांस्कृतिक-क्षेत्र सूची से देखें। क्षेत्रीय वर्गीकरण लिखित स्थानीय समीक्षा के लिए खुला है।",
+    exploreAction: "क्षेत्रीय निर्देशिका खोलें",
+    exploreNote: "सांस्कृतिक क्षेत्र आधिकारिक चुनावी सीमाएँ नहीं हैं।",
     surveyEyebrow: "आगामी सर्वेक्षण",
     surveyTitle: "जनहित का एक सर्वेक्षण तैयार किया जा रहा है।",
     surveyBody:

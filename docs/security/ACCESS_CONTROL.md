@@ -1,6 +1,6 @@
 # Access control and operational security
 
-Status: proposed control model; no accounts or grants exist yet.
+Status: proposed production control model with locally validated MySQL roles. No production accounts or authentication exist.
 
 ## Authorization rules
 
@@ -45,7 +45,7 @@ No role alone can both decrypt/export raw confidential data and approve that act
 
 Every account is environment-specific, host/NSG-restricted, uses verified TLS and `REQUIRE SSL`, has no `GRANT OPTION`, and receives no global wildcard privilege. Root/admin credentials are break-glass only, stored in Vault, rotated after use, and monitored.
 
-Before migrations, generate and review exact `SHOW GRANTS` output and prove denied operations with integration tests.
+Exact role statements are in `docs/design/mysql-grants.sql`. The disposable MySQL test proved that the public role cannot read confidential tables, the ingestion role cannot list encrypted answers, and the backup role can read but cannot delete responses. Production login accounts remain separate: create them with environment-specific host restrictions and `REQUIRE SSL`, assign exactly one workload role by default, and review `SHOW GRANTS` before release.
 
 ## Administrator authentication
 
@@ -79,7 +79,9 @@ Log authentication outcome, session/role changes, access denials, survey lifecyc
 
 Never log answer/identity plaintext, passwords, tokens, cookies, full request/response bodies, SQL parameters containing sensitive values, encryption keys, wrapped-key blobs, consent free text, or full IP/user-agent by default. Apply field allowlists and automated log-canary tests.
 
-The application audit table is append-only to its writer and hash-chained, then exported frequently to separately controlled storage. Hash chaining detects but cannot prevent deletion by a fully privileged DBA; external copies and alerting are required.
+The application audit table is append-only to its writer and hash-chained. At a fixed event/time boundary, a checkpoint records the range, event count, terminal hash, and a keyed anchor digest. The checkpoint document is written through a separate identity to an external append-protected destination; MySQL stores only the destination and receipt digest. Verification recomputes the event chain, keyed anchor, external receipt, range continuity, and absence of checkpoint gaps. A checkpoint stored only in MySQL is not an anchor. Hash chaining detects but cannot prevent deletion by a fully privileged DBA; independent anchor custody and alerts are required.
+
+The Step 2B fake anchor uses an in-memory HMAC key and proves tamper detection only. Production must use a separate Vault key/principal and separately controlled storage or transparency service.
 
 ## Abuse prevention
 

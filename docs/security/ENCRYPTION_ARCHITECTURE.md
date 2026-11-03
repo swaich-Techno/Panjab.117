@@ -1,6 +1,6 @@
 # Encryption and key-management architecture
 
-Status: design for approval; no encryption service or production key has been implemented.
+Status: design plus a development-only Node.js proof of concept. No production encryption service, OCI Vault connection, or production key has been implemented.
 
 ## Data protection layers
 
@@ -34,7 +34,9 @@ Use a reviewed runtime library (Node.js built-in `crypto` is acceptable for AES-
 - Do not reuse a nonce with the same DEK. Treat a duplicate as a security incident; enforce generation in one library and add collision telemetry that never records key/nonce pairs in logs.
 - Decryption authenticates AAD and tag before parsing; any failure returns a generic error, emits a redacted high-severity event, and never returns partial plaintext.
 
-Using a per-response DEK allows identity and answer records to be cryptographically erased by destroying their wrapped DEK, subject to backup retention and legal obligations. Optional identity may use a separate DEK so identity can be erased earlier without removing research answers.
+Each response owns exactly one answer-DEK identity and, only when optional identity exists, one separate identity-DEK identity. Database composite foreign keys bind each DEK to its response. The two purposes have different KEKs, wrap tables, permissions, and destruction events; a key or wrap from one purpose cannot satisfy the other purpose's foreign key or authenticated context.
+
+The DEK is generated once, used for fields of the same response and purpose with a fresh 96-bit nonce per field, then zeroed from the application buffer. Only authenticated wrapped copies persist. Identity-key destruction may occur earlier without removing research answers. Cryptographic deletion marks the owned key destroyed and deletes every active/decrypt-only wrap in one approved transaction; ciphertext may remain only as permanently unrecoverable evidence until normal row deletion. Backups may still contain old wraps until retention expiry, so the separately protected deletion ledger must be replayed before restored data is accessible.
 
 ## Key hierarchy and separation
 
@@ -67,6 +69,8 @@ Routine rotation:
 5. Retire old decrypt permission only after live data and retained backups no longer depend on it.
 6. Record approvals and key-version state without key material.
 
+The schema enforces one active wrap per owned DEK. A new wrap is inserted under the new KEK before the prior wrap becomes decrypt-only. A retired wrap is deleted only after every retained backup depending on it has expired or been rewrapped and a recovery test has passed.
+
 Emergency compromise:
 
 - Disable the affected workload identity/session first, preserve audit evidence, and stop sensitive writes/exports.
@@ -97,6 +101,10 @@ Do not encrypt passwords, use reversible hashes, or invent a construction. RFC 9
 - Prove TLS failure for invalid CA, hostname mismatch, expired certificate, and plaintext fallback.
 - Prove old/new key-version compatibility during rotation and recovery from interrupted rewrap.
 - Restore an encrypted backup in isolation and decrypt approved synthetic samples.
+
+## Step 2B prototype results
+
+The local module under `src/lib/security` uses Node.js `crypto` only. Tests cover AES-256-GCM, 256-bit random DEKs, 96-bit random nonces, deterministic length-delimited AAD, purpose/owner separation, tag/ciphertext/nonce/AAD tampering, 5,000 nonce generations, KEK rewrap, recovery with an old decrypt-only key, failure after key removal, independent backup encryption, corrupted artifacts, and deletion-ledger mismatch. The in-memory key provider is deliberately incapable of production persistence or access control and must never be substituted for OCI Vault.
 
 ## Sources verified 2026-11-03
 

@@ -13,6 +13,7 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:security:mysql": "vitest run src/lib/security/mysql.integration.test.ts",
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
@@ -29,6 +30,7 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.4",
+    "mysql2": "3.24.6",
     "postcss": "^8.5.0",
     "prettier": "^3.6.0",
     "tailwindcss": "4.3.4",
