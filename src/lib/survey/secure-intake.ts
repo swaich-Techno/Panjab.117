@@ -34,6 +34,8 @@ import {
 import { QUESTIONNAIRE_VERSION } from "./questionnaire";
 
 export const MAX_INTAKE_BODY_BYTES = 32 * 1024;
+export const SYNTHETIC_COLLECTION_APPROVAL_ID =
+  "00000000-0000-4000-8000-000000000000";
 
 export const step5AIntakeConfiguration = {
   mode: "synthetic_local_only",
@@ -79,6 +81,7 @@ export type EncryptedAnswerPartition = {
 
 export type SecureSurveyRecord = {
   responseId: string;
+  collectionApprovalId: string;
   questionnaireVersion: typeof QUESTIONNAIRE_VERSION;
   consentNoticeVersion: typeof CONSENT_NOTICE_VERSION;
   consentNoticeDigest: typeof CONSENT_NOTICE_DIGEST;
@@ -93,6 +96,13 @@ export type SecureSurveyRecord = {
   withdrawalCode: WithdrawalCodeRecord;
   syntheticOnly: true;
 };
+
+export interface SecureIntakeRepository {
+  commit(
+    record: SecureSurveyRecord,
+    claim: AtomicIntakeClaim,
+  ): Promise<AtomicIntakeOutcome>;
+}
 
 export type SecureIntakeReceipt = {
   status: AtomicIntakeOutcome["status"];
@@ -119,7 +129,7 @@ function cloneState(state: StoreState): StoreState {
   };
 }
 
-export class InMemorySecureIntakeRepository {
+export class InMemorySecureIntakeRepository implements SecureIntakeRepository {
   #state: StoreState = {
     records: new Map(),
     idempotencySignals: new Set(),
@@ -292,8 +302,9 @@ export async function submitSyntheticIntake(
     withdrawalCodeExpiresAt: string;
     keyProvider: KeyProvider;
     screeningKeyRing: ScreeningKeyRing;
-    repository: InMemorySecureIntakeRepository;
+    repository: SecureIntakeRepository;
     rateLimit: number;
+    collectionApprovalId?: string;
     createResponseId?: () => string;
   },
 ): Promise<SecureIntakeReceipt> {
@@ -355,6 +366,8 @@ export async function submitSyntheticIntake(
   );
   const record: SecureSurveyRecord = {
     responseId,
+    collectionApprovalId:
+      dependencies.collectionApprovalId ?? SYNTHETIC_COLLECTION_APPROVAL_ID,
     questionnaireVersion: QUESTIONNAIRE_VERSION,
     consentNoticeVersion: CONSENT_NOTICE_VERSION,
     consentNoticeDigest: CONSENT_NOTICE_DIGEST,
