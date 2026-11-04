@@ -20,6 +20,11 @@ import type {
   SecureIntakeRepository,
   SecureSurveyRecord,
 } from "@/lib/survey/secure-intake";
+import {
+  screeningRetentionWindow,
+  syntheticScreeningRetentionPolicy,
+  type ScreeningRetentionPolicy,
+} from "@/lib/survey/screening-retention";
 
 import { STEP5B_DATABASE } from "./mysql-step5b-migrations";
 
@@ -38,6 +43,7 @@ export type MysqlAdapterHooks = {
   ) => Promise<void> | void;
   afterCommit?: (record: SecureSurveyRecord) => Promise<void> | void;
   onRetry?: (attempt: number, errorCode: string) => void;
+  retentionPolicy?: ScreeningRetentionPolicy;
 };
 
 export class CollectionApprovalError extends Error {
@@ -92,21 +98,6 @@ function submittedDate(record: SecureSurveyRecord): Date {
   return result;
 }
 
-function durableWindow(record: SecureSurveyRecord): SignalWindow {
-  const seenAt = submittedDate(record);
-  return {
-    start: new Date("2026-01-01T00:00:00.000Z"),
-    end: new Date("2038-01-01T00:00:00.000Z"),
-    seenAt,
-  };
-}
-
-function rateWindow(record: SecureSurveyRecord): SignalWindow {
-  const seenAt = submittedDate(record);
-  const start = new Date(Math.floor(seenAt.getTime() / 3_600_000) * 3_600_000);
-  return { start, end: new Date(start.getTime() + 3_600_000), seenAt };
-}
-
 function outcome(status: AtomicIntakeOutcome["status"]): AtomicIntakeOutcome {
   return {
     status,
@@ -154,9 +145,9 @@ async function findExistingClaim(
       `SELECT response_id
        FROM ${STEP5B_DATABASE}.survey_screening_claims
        WHERE domain = ? AND screening_key_id = ? AND signal_digest = ?
-         AND window_start = ?
+         AND window_start = ? AND window_end > ?
        LIMIT 1 FOR UPDATE`,
-      [domain, signal.keyId, signal.digest, window.start],
+      [domain, signal.keyId, signal.digest, window.start, window.seenAt],
     );
     const responseId = rows[0]?.response_id as Buffer | null | undefined;
     if (responseId) return responseId;
@@ -318,10 +309,16 @@ export class MysqlSecureIntakeTestAdapter implements SecureIntakeRepository {
         await connection.beginTransaction();
         await assertApprovedRegistry(connection, record);
 
+        const retentionPolicy =
+          this.hooks.retentionPolicy ?? syntheticScreeningRetentionPolicy;
         const rateCount = await incrementRateClaims(
           connection,
           claim.rateSignals,
-          rateWindow(record),
+          screeningRetentionWindow(
+            retentionPolicy,
+            "rate_limit",
+            submittedDate(record),
+          ),
         );
         if (rateCount > claim.rateLimit) {
           await connection.commit();
@@ -329,23 +326,32 @@ export class MysqlSecureIntakeTestAdapter implements SecureIntakeRepository {
           return outcome("rate_limited");
         }
 
-        const durable = durableWindow(record);
+        const idempotencyWindow = screeningRetentionWindow(
+          retentionPolicy,
+          "idempotency",
+          submittedDate(record),
+        );
         const replayResponse = await findExistingClaim(
           connection,
           "idempotency",
           claim.idempotencySignals,
-          durable,
+          idempotencyWindow,
         );
         if (replayResponse) {
           await connection.commit();
           committed = true;
           return outcome("replay");
         }
+        const duplicateWindow = screeningRetentionWindow(
+          retentionPolicy,
+          "answer_duplicate",
+          submittedDate(record),
+        );
         const duplicateResponse = await findExistingClaim(
           connection,
           "answer_duplicate",
           claim.payloadSignals,
-          durable,
+          duplicateWindow,
         );
         const isDuplicate = duplicateResponse !== null;
         const responseId = uuidToBuffer(record.responseId);
@@ -402,7 +408,7 @@ export class MysqlSecureIntakeTestAdapter implements SecureIntakeRepository {
             "idempotency",
             signal,
             responseId,
-            durable,
+            idempotencyWindow,
           );
         }
         if (!isDuplicate) {
@@ -412,7 +418,7 @@ export class MysqlSecureIntakeTestAdapter implements SecureIntakeRepository {
               "answer_duplicate",
               signal,
               responseId,
-              durable,
+              duplicateWindow,
             );
           }
         }

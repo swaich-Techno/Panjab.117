@@ -58,3 +58,21 @@ separately reviewed private service with application-level civic/political
 encryption, database role separation, MFA-protected raw access and tested
 backup/deletion controls. Free tiers are not assumed to satisfy confidential
 production requirements.
+
+## 009 — Separate fail-closed intake transport
+
+**Status:** Accepted for synthetic development; no endpoint deployed
+
+The HTTP boundary is framework-independent and intended for a separate private
+runtime. It enforces HTTPS, exact Origin, Fetch Metadata, signed double-submit
+CSRF proof, JSON/body limits and no-store responses before calling encrypted
+intake. The public static application receives no endpoint configuration.
+
+## 010 — Evidence-backed activation, not an environment toggle
+
+**Status:** Accepted; every production approval remains false
+
+Production activation requires security, privacy, consent, backup/recovery,
+operations and final-launch records bound to exact content, commit and image
+digests. Expired, revoked, incomplete or mismatched evidence fails closed. An
+environment variable cannot replace these records.

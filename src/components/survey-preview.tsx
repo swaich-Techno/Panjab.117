@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
+import type { Locale } from "@/lib/i18n";
 import type { SurveyPreviewCopy } from "@/lib/survey/preview-translations";
 
 export type LocalizedPreviewQuestion = {
@@ -46,6 +47,22 @@ type SurveyPreviewProps = {
   questions: readonly LocalizedPreviewQuestion[];
   questionnaireVersion: string;
   consentVersion: string;
+  consentDigest: string;
+  locale: Locale;
+  collectionTransport?: {
+    endpoint: string;
+    csrf: {
+      keyId: string;
+      token: string;
+      issuedAt: string;
+      signature: string;
+    };
+  };
+};
+
+type CollectionReceipt = {
+  responseId: string;
+  withdrawalCode: string;
 };
 
 export function SurveyPreview({
@@ -54,14 +71,24 @@ export function SurveyPreview({
   questions,
   questionnaireVersion,
   consentVersion,
+  consentDigest,
+  locale,
+  collectionTransport,
 }: SurveyPreviewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [civicConsent, setCivicConsent] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [politicalConsent, setPoliticalConsent] = useState<boolean | null>(
     null,
   );
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [receipt, setReceipt] = useState<CollectionReceipt | null>(null);
+  const retryTokens = useRef<{
+    idempotencyKey: string;
+    privacyScopeToken: string;
+  } | null>(null);
 
   const stages = useMemo<readonly PreviewStage[]>(() => {
     const civicQuestions = questions.filter(
@@ -98,9 +125,15 @@ export function SurveyPreview({
   }
 
   function validateAndContinue() {
-    if (stage.kind === "consent" && !civicConsent) {
-      setError(copy.consentError);
-      return;
+    if (stage.kind === "consent") {
+      if (!civicConsent) {
+        setError(copy.consentError);
+        return;
+      }
+      if (!ageConfirmed) {
+        setError(copy.ageError);
+        return;
+      }
     }
     if (
       stage.kind === "question" &&
@@ -171,9 +204,88 @@ export function SurveyPreview({
   function restart() {
     setCurrentIndex(0);
     setCivicConsent(false);
+    setAgeConfirmed(false);
     setPoliticalConsent(null);
     setAnswers({});
     setError("");
+    setReceipt(null);
+    setSubmitting(false);
+    retryTokens.current = null;
+  }
+
+  async function submitCollection() {
+    if (!collectionTransport || submitting || receipt) return;
+    const tokens =
+      retryTokens.current ??
+      (retryTokens.current = {
+        idempotencyKey: crypto.randomUUID().replaceAll("-", ""),
+        privacyScopeToken: crypto.randomUUID().replaceAll("-", ""),
+      });
+    const civicQuestionIds = new Set(
+      questions
+        .filter(({ politicalOpinion }) => !politicalOpinion)
+        .map(({ id }) => id),
+    );
+    const politicalQuestionIds = new Set(
+      questions
+        .filter(({ politicalOpinion }) => politicalOpinion)
+        .map(({ id }) => id),
+    );
+    const answerEntries = Object.entries(answers);
+    const body = JSON.stringify({
+      questionnaireVersion,
+      locale,
+      ...tokens,
+      minimumAgeConfirmed: ageConfirmed,
+      consent: {
+        civicParticipation: civicConsent,
+        politicalOpinion: politicalConsent === true,
+        noticeVersion: consentVersion,
+        noticeDigest: consentDigest,
+      },
+      answers: Object.fromEntries(
+        answerEntries.filter(([id]) => civicQuestionIds.has(id)),
+      ),
+      politicalAnswers: Object.fromEntries(
+        answerEntries.filter(([id]) => politicalQuestionIds.has(id)),
+      ),
+    });
+    setSubmitting(true);
+    setError("");
+    try {
+      const result = await fetch(collectionTransport.endpoint, {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
+        referrerPolicy: "no-referrer",
+        headers: {
+          "content-type": "application/json",
+          "x-p117-csrf-key-id": collectionTransport.csrf.keyId,
+          "x-p117-csrf-token": collectionTransport.csrf.token,
+          "x-p117-csrf-issued-at": collectionTransport.csrf.issuedAt,
+          "x-p117-csrf-signature": collectionTransport.csrf.signature,
+        },
+        body,
+      });
+      const candidate = (await result.json()) as Record<string, unknown>;
+      if (
+        !result.ok ||
+        typeof candidate.responseId !== "string" ||
+        typeof candidate.withdrawalCode !== "string"
+      ) {
+        throw new Error("Submission was not confirmed");
+      }
+      setReceipt({
+        responseId: candidate.responseId,
+        withdrawalCode: candidate.withdrawalCode,
+      });
+      retryTokens.current = null;
+      setAnswers({});
+    } catch {
+      setError(copy.submitError);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -256,6 +368,18 @@ export function SurveyPreview({
                 type="checkbox"
               />
               <span>{consent.coreConsentLabel}</span>
+            </label>
+            <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-300 bg-white p-4 font-semibold text-[#0d2137]">
+              <input
+                checked={ageConfirmed}
+                className="mt-1 size-5 shrink-0 accent-[#173a5e]"
+                onChange={(event) => {
+                  setAgeConfirmed(event.target.checked);
+                  setError("");
+                }}
+                type="checkbox"
+              />
+              <span>{copy.ageConfirmation}</span>
             </label>
           </div>
         ) : null}
@@ -364,7 +488,35 @@ export function SurveyPreview({
           </fieldset>
         ) : null}
 
-        {stage.kind === "review" ? (
+        {stage.kind === "review" && receipt ? (
+          <div aria-live="polite">
+            <h2
+              className="font-serif text-3xl font-bold text-[#0d2137]"
+              id="preview-heading"
+            >
+              {copy.receiptTitle}
+            </h2>
+            <dl className="mt-6 space-y-4 rounded-2xl border border-emerald-300 bg-emerald-50 p-5 text-[#0d2137]">
+              <div>
+                <dt className="text-sm font-bold">{copy.responseReference}</dt>
+                <dd className="mt-1 break-all font-mono text-sm">
+                  {receipt.responseId}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-sm font-bold">{copy.withdrawalReceipt}</dt>
+                <dd className="mt-1 break-all font-mono text-sm">
+                  {receipt.withdrawalCode}
+                </dd>
+              </div>
+            </dl>
+            <p className="mt-4 font-semibold text-[#9c2f1b]">
+              {copy.receiptWarning}
+            </p>
+          </div>
+        ) : null}
+
+        {stage.kind === "review" && !receipt ? (
           <div aria-live="polite">
             <h2
               className="font-serif text-3xl font-bold text-[#0d2137]"
@@ -383,11 +535,50 @@ export function SurveyPreview({
                 ).length
               }
             </p>
-            <p className="mt-4 text-sm font-bold text-[#9c2f1b]">
-              {copy.noSubmission}
-            </p>
+            <h3 className="mt-7 font-serif text-2xl font-bold text-[#0d2137]">
+              {copy.reviewSelections}
+            </h3>
+            <dl className="mt-4 divide-y divide-slate-200 rounded-2xl border border-slate-200 px-4">
+              {questions
+                .filter(({ id }) => answers[id] !== undefined)
+                .map((question) => {
+                  const selected = Array.isArray(answers[question.id])
+                    ? (answers[question.id] as string[])
+                    : [answers[question.id] as string];
+                  const labels = selected.map(
+                    (id) =>
+                      question.options.find((option) => option.id === id)
+                        ?.label ?? id,
+                  );
+                  return (
+                    <div className="py-4" key={question.id}>
+                      <dt className="font-bold text-[#0d2137]">
+                        {question.prompt}
+                      </dt>
+                      <dd className="mt-1 text-sm text-slate-700">
+                        {labels.join(", ")}
+                      </dd>
+                    </div>
+                  );
+                })}
+            </dl>
+            {collectionTransport ? (
+              <button
+                className="button-primary mt-7 disabled:cursor-wait disabled:opacity-60"
+                disabled={submitting}
+                onClick={() => void submitCollection()}
+                type="button"
+              >
+                {submitting ? copy.submitting : copy.submit}
+              </button>
+            ) : (
+              <p className="mt-4 text-sm font-bold text-[#9c2f1b]">
+                {copy.noSubmission}
+              </p>
+            )}
             <button
               className="button-secondary mt-7"
+              disabled={submitting}
               onClick={restart}
               type="button"
             >

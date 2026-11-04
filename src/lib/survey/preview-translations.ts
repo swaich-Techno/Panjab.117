@@ -13,6 +13,8 @@ export type SurveyPreviewCopy = {
   chooseOne: string;
   chooseUpToThree: string;
   consentError: string;
+  ageConfirmation: string;
+  ageError: string;
   segmentError: string;
   politicalChoiceError: string;
   politicalChoiceTitle: string;
@@ -26,6 +28,14 @@ export type SurveyPreviewCopy = {
   answeredCount: string;
   restart: string;
   noSubmission: string;
+  reviewSelections: string;
+  submit: string;
+  submitting: string;
+  submitError: string;
+  receiptTitle: string;
+  responseReference: string;
+  withdrawalReceipt: string;
+  receiptWarning: string;
   questionnaireVersion: string;
   consentVersion: string;
 };
@@ -44,6 +54,9 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     chooseOne: "Choose one answer.",
     chooseUpToThree: "Choose up to three answers.",
     consentError: "Confirm the civic preview consent before continuing.",
+    ageConfirmation:
+      "I confirm that I am 18 or older. This age policy is still a draft.",
+    ageError: "Confirm the draft minimum-age requirement before continuing.",
     segmentError: "Choose one Assembly segment before continuing.",
     politicalChoiceError:
       "Choose whether to preview the optional political-opinion questions.",
@@ -61,6 +74,16 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     restart: "Clear preview and start again",
     noSubmission:
       "There is deliberately no submit button or submission endpoint.",
+    reviewSelections: "Review your selections",
+    submit: "Submit securely",
+    submitting: "Submitting securely…",
+    submitError:
+      "Submission was not confirmed. Your answers remain in this tab so you can try again.",
+    receiptTitle: "Submission confirmed",
+    responseReference: "Response reference",
+    withdrawalReceipt: "One-time withdrawal receipt",
+    receiptWarning:
+      "Save this receipt now. It is shown once and is not stored in your browser.",
     questionnaireVersion: "Questionnaire",
     consentVersion: "Consent",
   },
@@ -77,6 +100,9 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     chooseOne: "ਇੱਕ ਜਵਾਬ ਚੁਣੋ।",
     chooseUpToThree: "ਵੱਧ ਤੋਂ ਵੱਧ ਤਿੰਨ ਜਵਾਬ ਚੁਣੋ।",
     consentError: "ਅੱਗੇ ਵਧਣ ਤੋਂ ਪਹਿਲਾਂ ਨਾਗਰਿਕ ਝਲਕ ਲਈ ਸਹਿਮਤੀ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।",
+    ageConfirmation:
+      "ਮੈਂ ਪੁਸ਼ਟੀ ਕਰਦਾ/ਕਰਦੀ ਹਾਂ ਕਿ ਮੇਰੀ ਉਮਰ 18 ਸਾਲ ਜਾਂ ਇਸ ਤੋਂ ਵੱਧ ਹੈ। ਇਹ ਉਮਰ ਨੀਤੀ ਦਾ ਮਸੌਦਾ ਹੈ।",
+    ageError: "ਅੱਗੇ ਵਧਣ ਤੋਂ ਪਹਿਲਾਂ ਮਸੌਦਾ ਘੱਟੋ-ਘੱਟ ਉਮਰ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।",
     segmentError: "ਅੱਗੇ ਵਧਣ ਤੋਂ ਪਹਿਲਾਂ ਇੱਕ ਵਿਧਾਨ ਸਭਾ ਹਲਕਾ ਚੁਣੋ।",
     politicalChoiceError:
       "ਚੁਣੋ ਕਿ ਤੁਸੀਂ ਵਿਕਲਪਿਕ ਰਾਜਨੀਤਿਕ-ਰਾਏ ਸਵਾਲਾਂ ਦੀ ਝਲਕ ਵੇਖਣੀ ਹੈ ਜਾਂ ਨਹੀਂ।",
@@ -93,6 +119,16 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     answeredCount: "ਇਸ ਝਲਕ ਵਿੱਚ ਦਿੱਤੇ ਜਵਾਬ",
     restart: "ਝਲਕ ਸਾਫ਼ ਕਰਕੇ ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ",
     noSubmission: "ਜਾਣਬੁੱਝ ਕੇ ਕੋਈ ਭੇਜਣ ਵਾਲਾ ਬਟਨ ਜਾਂ ਸਬਮਿਸ਼ਨ ਐਂਡਪੌਇੰਟ ਨਹੀਂ ਹੈ।",
+    reviewSelections: "ਆਪਣੀਆਂ ਚੋਣਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ",
+    submit: "ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਭੇਜੋ",
+    submitting: "ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਭੇਜਿਆ ਜਾ ਰਿਹਾ ਹੈ…",
+    submitError:
+      "ਭੇਜਣਾ ਪੱਕਾ ਨਹੀਂ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਲਈ ਤੁਹਾਡੇ ਜਵਾਬ ਇਸ ਟੈਬ ਵਿੱਚ ਹੀ ਹਨ।",
+    receiptTitle: "ਭੇਜਣਾ ਪੱਕਾ ਹੋਇਆ",
+    responseReference: "ਜਵਾਬ ਹਵਾਲਾ",
+    withdrawalReceipt: "ਇੱਕ-ਵਾਰ ਵਰਤੋਂ ਵਾਲੀ ਵਾਪਸੀ ਰਸੀਦ",
+    receiptWarning:
+      "ਇਹ ਰਸੀਦ ਹੁਣੇ ਸੰਭਾਲੋ। ਇਹ ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਦਿਖਾਈ ਜਾਂਦੀ ਹੈ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਨਹੀਂ ਸੰਭਾਲੀ ਜਾਂਦੀ।",
     questionnaireVersion: "ਪ੍ਰਸ਼ਨਾਵਲੀ",
     consentVersion: "ਸਹਿਮਤੀ",
   },
@@ -110,6 +146,9 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     chooseUpToThree: "अधिकतम तीन उत्तर चुनें।",
     consentError:
       "आगे बढ़ने से पहले नागरिक पूर्वावलोकन की सहमति की पुष्टि करें।",
+    ageConfirmation:
+      "मैं पुष्टि करता/करती हूँ कि मेरी आयु 18 वर्ष या उससे अधिक है। यह आयु नीति का मसौदा है।",
+    ageError: "आगे बढ़ने से पहले मसौदा न्यूनतम-आयु आवश्यकता की पुष्टि करें।",
     segmentError: "आगे बढ़ने से पहले एक विधानसभा क्षेत्र चुनें।",
     politicalChoiceError:
       "चुनें कि आप वैकल्पिक राजनीतिक-राय प्रश्नों का पूर्वावलोकन देखना चाहते हैं या नहीं।",
@@ -127,6 +166,16 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     answeredCount: "इस पूर्वावलोकन में दिए गए उत्तर",
     restart: "पूर्वावलोकन साफ़ करके फिर शुरू करें",
     noSubmission: "जानबूझकर कोई भेजने का बटन या सबमिशन एंडपॉइंट नहीं है।",
+    reviewSelections: "अपने चुने हुए उत्तरों की समीक्षा करें",
+    submit: "सुरक्षित रूप से भेजें",
+    submitting: "सुरक्षित रूप से भेजा जा रहा है…",
+    submitError:
+      "भेजने की पुष्टि नहीं हुई। दोबारा प्रयास के लिए आपके उत्तर इसी टैब में हैं।",
+    receiptTitle: "भेजने की पुष्टि हुई",
+    responseReference: "उत्तर संदर्भ",
+    withdrawalReceipt: "एक बार उपयोग होने वाली वापसी रसीद",
+    receiptWarning:
+      "यह रसीद अभी सुरक्षित रखें। इसे केवल एक बार दिखाया जाता है और ब्राउज़र में सहेजा नहीं जाता।",
     questionnaireVersion: "प्रश्नावली",
     consentVersion: "सहमति",
   },

@@ -36,6 +36,19 @@ export interface DeletionLedgerEntry {
   recordedAt: string;
 }
 
+export function mustSuppressRestoredResponse(
+  responseId: string,
+  deletionLedger: readonly DeletionLedgerEntry[],
+): boolean {
+  return deletionLedger.some(
+    (entry) =>
+      entry.responseId === responseId &&
+      (entry.action === "destroy_answer_key" ||
+        entry.action === "destroy_political_answer_key" ||
+        entry.action === "destroy_identity_key"),
+  );
+}
+
 function sha256(value: Buffer | string): string {
   return createHash("sha256").update(value).digest("base64url");
 }

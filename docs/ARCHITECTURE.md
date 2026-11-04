@@ -37,6 +37,13 @@ Civic and separately consented political answers use distinct application-level
 encryption purposes and raw-review roles. See the
 [Step 5A architecture decision](architecture/STEP_5A_ARCHITECTURE_DECISION.md).
 
+Step 5C adds a transport-agnostic HTTPS intake boundary and evidence-backed
+activation contract without publishing an endpoint. The static Cloudflare
+Pages application remains unable to submit. A future separately hosted intake
+service must supply exact release-bound approval evidence, managed secrets,
+KMS and private MySQL; environment flags alone cannot authorize collection.
+See the [Step 5C implementation](development/STEP_5C_IMPLEMENTATION.md).
+
 ## Quality pipeline
 
 Pull requests and pushes to `main` run formatting checks, ESLint, strict TypeScript, Vitest and a production build. The same commands are available locally through npm scripts.

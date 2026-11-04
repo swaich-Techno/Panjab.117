@@ -14,7 +14,11 @@ import {
   localizedAlternates,
 } from "@/lib/public-site";
 import { getRegionalDictionary } from "@/lib/regional-translations";
-import { CONSENT_NOTICE_VERSION, getConsentNotice } from "@/lib/survey/consent";
+import {
+  CONSENT_NOTICE_DIGEST,
+  CONSENT_NOTICE_VERSION,
+  getConsentNotice,
+} from "@/lib/survey/consent";
 import { surveyPreviewCopy } from "@/lib/survey/preview-translations";
 import {
   fatehgarhSahibQuestionnaire,
@@ -156,8 +160,10 @@ export default async function SurveyPreviewPage({ params }: PageProps) {
           </div>
           <SurveyPreview
             consent={notice}
+            consentDigest={CONSENT_NOTICE_DIGEST}
             consentVersion={CONSENT_NOTICE_VERSION}
             copy={surveyPreviewCopy[locale]}
+            locale={locale}
             questionnaireVersion={QUESTIONNAIRE_VERSION}
             questions={localizedQuestions}
           />
