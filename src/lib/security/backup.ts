@@ -29,7 +29,10 @@ export interface EncryptedBackupArtifact {
 
 export interface DeletionLedgerEntry {
   responseId: string;
-  action: "destroy_answer_key" | "destroy_identity_key";
+  action:
+    | "destroy_answer_key"
+    | "destroy_political_answer_key"
+    | "destroy_identity_key";
   recordedAt: string;
 }
 

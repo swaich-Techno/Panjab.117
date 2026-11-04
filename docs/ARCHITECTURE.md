@@ -30,6 +30,13 @@ Tailwind CSS provides layout and component utilities; a small global stylesheet 
 
 This frontend has no database, API mutation routes, identity system, payments, survey form or admin surface. Basic response headers reduce framing, MIME-sniffing and unnecessary browser capabilities. Secrets must stay in server-only environment variables in future phases; anything prefixed with `NEXT_PUBLIC_` is public by design.
 
+Step 5A adds a server-only, synthetic intake contract and draft MySQL schema
+without connecting them to the application. The recommended future boundary is
+a dedicated intake service, not a mutation route in the static Pages project.
+Civic and separately consented political answers use distinct application-level
+encryption purposes and raw-review roles. See the
+[Step 5A architecture decision](architecture/STEP_5A_ARCHITECTURE_DECISION.md).
+
 ## Quality pipeline
 
 Pull requests and pushes to `main` run formatting checks, ESLint, strict TypeScript, Vitest and a production build. The same commands are available locally through npm scripts.

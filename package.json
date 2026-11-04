@@ -16,6 +16,7 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:security:intake": "vitest run src/lib/survey/secure-intake.test.ts src/lib/survey/withdrawal-service.test.ts src/lib/survey/mysql-migration.test.ts",
     "test:security:mysql": "vitest run src/lib/security/mysql.integration.test.ts",
     "test:watch": "vitest",
     "format": "prettier --write .",

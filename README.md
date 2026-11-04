@@ -54,6 +54,7 @@ npm run format:check
 npm run lint
 npm run typecheck
 npm run test
+npm run test:security:intake
 npm run build
 ```
 
@@ -78,3 +79,10 @@ Copy `.env.example` to `.env.local` only when local configuration becomes necess
 - [Step 4C public-preview release gate](docs/checklists/STEP_4C_PUBLIC_PREVIEW_RELEASE.md)
 - [Step 4C browser and accessibility checks](docs/checklists/STEP_4C_BROWSER_ACCESSIBILITY.md)
 - [Step 4C verification](docs/evidence/STEP_4C_VERIFICATION.md)
+- [Step 5A secure intake architecture](docs/architecture/STEP_5A_ARCHITECTURE_DECISION.md)
+- [Step 5A database security](docs/security/STEP_5A_DATABASE_SECURITY.md)
+- [Step 5A privacy and consent](docs/security/STEP_5A_PRIVACY_AND_CONSENT.md)
+- [Step 5A backup and recovery](docs/security/STEP_5A_BACKUP_RECOVERY.md)
+- [Step 5A security tests](docs/security/STEP_5A_SECURITY_TESTS.md)
+- [Step 5A live-collection gaps](docs/architecture/STEP_5A_LIVE_COLLECTION_GAPS.md)
+- [Step 5A verification](docs/evidence/STEP_5A_VERIFICATION.md)

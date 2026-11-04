@@ -10,7 +10,7 @@ import {
 export const ENVELOPE_VERSION = 1 as const;
 export const ENCRYPTION_ALGORITHM = "aes-256-gcm" as const;
 
-export type KeyPurpose = "answer" | "identity" | "backup";
+export type KeyPurpose = "answer" | "political_answer" | "identity" | "backup";
 
 export interface AuthenticatedContext {
   purpose: KeyPurpose;

@@ -46,3 +46,15 @@ headers by `_headers`, and constituency filtering by an in-browser component.
 This preserves the multilingual public experience without a server, API,
 database, Pages Function or Worker. A runtime deployment must be reconsidered
 only if a later approved feature genuinely requires server execution.
+
+## 008 — Separate confidential intake from the static public site
+
+**Status:** Proposed production target; Step 5A local design accepted
+
+The public Pages project stays static and receives no database identity. Step
+5A uses an in-memory synthetic adapter and draft MySQL migrations to define the
+future contract without creating an endpoint. Any production intake must be a
+separately reviewed private service with application-level civic/political
+encryption, database role separation, MFA-protected raw access and tested
+backup/deletion controls. Free tiers are not assumed to satisfy confidential
+production requirements.
