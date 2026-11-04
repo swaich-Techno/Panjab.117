@@ -35,3 +35,14 @@ Unicode-capable Gurmukhi and Devanagari system font fallbacks are used to avoid 
 **Status:** Accepted
 
 The homepage introduces the future directory but contains no constituency names or records. Data will be added only with a documented source, review date and verification workflow.
+
+## 007 — Static export for the read-only Cloudflare Pages preview
+
+**Status:** Accepted for local preparation; deployment not approved
+
+The public website is exported as static HTML, CSS and JavaScript. Request-time
+locale redirection is represented by Cloudflare's `_redirects` file, security
+headers by `_headers`, and constituency filtering by an in-browser component.
+This preserves the multilingual public experience without a server, API,
+database, Pages Function or Worker. A runtime deployment must be reconsidered
+only if a later approved feature genuinely requires server execution.

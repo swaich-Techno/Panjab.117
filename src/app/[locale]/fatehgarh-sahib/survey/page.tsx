@@ -26,8 +26,6 @@ import {
 } from "@/lib/survey/schedule";
 import { getDictionary } from "@/lib/translations";
 
-export const dynamic = "force-dynamic";
-
 type PageProps = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({
@@ -57,7 +55,7 @@ export default async function SurveyPreviewPage({ params }: PageProps) {
   const base = getDictionary(locale);
   const availability = getSurveyAvailability(
     fatehgarhSahibDraftSchedule,
-    new Date(),
+    new Date(fatehgarhSahibDraftSchedule.opensAt),
   );
   const localizedQuestions: LocalizedPreviewQuestion[] =
     fatehgarhSahibQuestionnaire.questions.map((question) => ({

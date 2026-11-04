@@ -9,7 +9,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "build:cloudflare": "npm run build && npm run verify:static",
+    "start": "node scripts/serve-static.mjs",
+    "preview:static": "node scripts/serve-static.mjs",
+    "verify:static": "node scripts/verify-static-export.mjs",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

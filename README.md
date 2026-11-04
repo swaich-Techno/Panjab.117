@@ -12,6 +12,8 @@ Panjab 117 is an independent multilingual civic research platform covering all 1
 - Synthetic withdrawal, keyed duplicate-screening and disclosure-control interfaces
 - Strict TypeScript, Tailwind CSS, ESLint, Prettier and Vitest
 - Automated GitHub quality checks
+- Dependency-free static export prepared for a separately approved Cloudflare
+  Pages public preview
 
 No survey submissions, authentication, production database access, payments or administrative tools are implemented. Cultural-region assignments require human review and are not presented as official classifications.
 
@@ -31,7 +33,19 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`. The root path redirects to English; `/pa` and `/hi` open Punjabi and Hindi respectively.
+Open `http://localhost:3000/en`; `/pa` and `/hi` open Punjabi and Hindi. The
+root redirect is a Cloudflare/static-preview rule and is not applied by the
+Next.js development server.
+
+To build and inspect the production-equivalent static output:
+
+```bash
+npm run build:cloudflare
+npm run preview:static
+```
+
+Open `http://127.0.0.1:4173`. The local preview reads the generated `out`
+directory and applies the committed Cloudflare `_headers` and root redirect.
 
 ## Quality commands
 
@@ -58,3 +72,9 @@ Copy `.env.example` to `.env.local` only when local configuration becomes necess
 - [Public-preview launch gate](docs/checklists/STEP_4B_PUBLIC_PREVIEW_GATE.md)
 - [Live-collection launch gate](docs/checklists/STEP_4B_LIVE_COLLECTION_GATE.md)
 - [Step 4B verification](docs/evidence/STEP_4B_VERIFICATION.md)
+- [Step 4C static-export compatibility](docs/architecture/STEP_4C_STATIC_EXPORT_COMPATIBILITY.md)
+- [Cloudflare Pages configuration](docs/deployment/CLOUDFLARE_PAGES.md)
+- [Step 4C rollback procedure](docs/deployment/STEP_4C_ROLLBACK.md)
+- [Step 4C public-preview release gate](docs/checklists/STEP_4C_PUBLIC_PREVIEW_RELEASE.md)
+- [Step 4C browser and accessibility checks](docs/checklists/STEP_4C_BROWSER_ACCESSIBILITY.md)
+- [Step 4C verification](docs/evidence/STEP_4C_VERIFICATION.md)

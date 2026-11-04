@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 
 import { publicSecurityHeaders } from "./security/public-headers";
 import {
@@ -58,5 +59,31 @@ describe("public preview readiness", () => {
     expect(headers.get("Content-Security-Policy")).toContain(
       "connect-src 'self'",
     );
+    expect(headers.get("X-Robots-Tag")).toBe("noindex, nofollow, noarchive");
+  });
+
+  it("keeps Cloudflare Pages headers synchronized with the application policy", () => {
+    const cloudflareHeaders = readFileSync(
+      new URL("../../public/_headers", import.meta.url),
+      "utf8",
+    );
+
+    for (const { key, value } of publicSecurityHeaders) {
+      expect(cloudflareHeaders).toContain(`  ${key}: ${value}`);
+    }
+
+    expect(cloudflareHeaders).toContain(
+      "Cache-Control: public, max-age=31536000, immutable",
+    );
+  });
+
+  it("uses a temporary root redirect without adding a runtime", () => {
+    const cloudflareRedirects = readFileSync(
+      new URL("../../public/_redirects", import.meta.url),
+      "utf8",
+    );
+
+    expect(cloudflareRedirects).toContain("/ /en/ 302");
+    expect(cloudflareRedirects).not.toContain(" 200");
   });
 });
