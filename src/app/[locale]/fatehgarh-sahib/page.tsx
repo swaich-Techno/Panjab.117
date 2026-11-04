@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,10 +9,26 @@ import {
   fatehgarhSahibSegments,
 } from "@/data/fatehgarh-sahib";
 import { isLocale } from "@/lib/i18n";
+import { localizedAlternates } from "@/lib/public-site";
 import { getRegionalDictionary } from "@/lib/regional-translations";
 import { getDictionary } from "@/lib/translations";
 
 type PageProps = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  const t = getRegionalDictionary(locale);
+  return {
+    title: `${t.fatehgarhTitle} | Panjab 117`,
+    description: t.fatehgarhBody,
+    alternates: {
+      languages: localizedAlternates("/fatehgarh-sahib"),
+    },
+  };
+}
 
 export default async function FatehgarhSahibPage({ params }: PageProps) {
   const { locale } = await params;

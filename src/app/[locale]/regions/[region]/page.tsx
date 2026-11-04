@@ -11,6 +11,7 @@ import {
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { isLocale, locales } from "@/lib/i18n";
+import { localizedAlternates } from "@/lib/public-site";
 import { getRegionalDictionary } from "@/lib/regional-translations";
 import { getDictionary } from "@/lib/translations";
 
@@ -34,6 +35,9 @@ export async function generateMetadata({
   return {
     title: `${t.regions[region].name} | Panjab 117`,
     description: t.directoryBody,
+    alternates: {
+      languages: localizedAlternates(`/regions/${region}`),
+    },
   };
 }
 

@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { isLocale, locales } from "@/lib/i18n";
+import {
+  getPublicSiteOrigin,
+  isPublicPreviewIndexingEnabled,
+} from "@/lib/public-site";
 import { getDictionary } from "@/lib/translations";
 
 import "../globals.css";
@@ -26,12 +30,20 @@ export async function generateMetadata({
   }
 
   const t = getDictionary(locale);
+  const origin = getPublicSiteOrigin();
+  const indexingEnabled = isPublicPreviewIndexingEnabled();
 
   return {
+    metadataBase: origin ? new URL(origin) : undefined,
     title: `${t.siteName} | ${t.heroEyebrow}`,
     description: t.heroBody,
+    applicationName: t.siteName,
     alternates: {
       languages: Object.fromEntries(locales.map((item) => [item, `/${item}`])),
+    },
+    robots: {
+      index: indexingEnabled,
+      follow: indexingEnabled,
     },
   };
 }

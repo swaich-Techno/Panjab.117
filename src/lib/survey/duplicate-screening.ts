@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac } from "node:crypto";
 
 export type RiskFlag = {
   code: "replayed_idempotency_key" | "duplicate_payload" | "rate_limited";
@@ -86,9 +86,12 @@ export class ScreeningKeyRing {
   }
 }
 
-export interface AtomicSignalStore {
-  /** Atomically claims every supplied rotation-equivalent signal or none. */
-  claimAny(signals: readonly string[]): Promise<{ claimed: boolean }>;
+export interface AtomicScreeningStore {
+  /** Atomically evaluates and commits idempotency and payload signals. */
+  claim(input: {
+    idempotencySignals: readonly string[];
+    payloadSignals: readonly string[];
+  }): Promise<{ status: "accepted" | "replay" | "duplicate" }>;
 }
 
 export interface RateLimiter {
@@ -123,8 +126,7 @@ export async function screenSyntheticSubmission(
   input: DuplicateScreeningInput,
   dependencies: {
     keyRing: ScreeningKeyRing;
-    idempotencyStore: AtomicSignalStore;
-    duplicateStore: AtomicSignalStore;
+    screeningStore: AtomicScreeningStore;
     rateLimiter: RateLimiter;
   },
 ): Promise<DuplicateScreeningResult> {
@@ -152,38 +154,30 @@ export async function screenSyntheticSubmission(
       input.surveyVersionId,
       input.idempotencyKey,
     ]);
-    const idempotencyClaim = await dependencies.idempotencyStore.claimAny(
-      storeValues(idempotencySignals),
-    );
+    const payloadSignals = dependencies.keyRing.deriveAll("answer_duplicate", [
+      input.surveyVersionId,
+      String(input.constituencyNumber),
+      input.canonicalAnswerPayload,
+    ]);
+    const claim = await dependencies.screeningStore.claim({
+      idempotencySignals: storeValues(idempotencySignals),
+      payloadSignals: storeValues(payloadSignals),
+    });
 
-    if (!idempotencyClaim.claimed) {
+    if (claim.status === "replay") {
       flags.push({
         code: "replayed_idempotency_key",
         severity: "high",
         explanation:
           "This survey-version-scoped idempotency signal was already claimed.",
       });
-    } else {
-      const payloadSignals = dependencies.keyRing.deriveAll(
-        "answer_duplicate",
-        [
-          input.surveyVersionId,
-          String(input.constituencyNumber),
-          input.canonicalAnswerPayload,
-        ],
-      );
-      const payloadClaim = await dependencies.duplicateStore.claimAny(
-        storeValues(payloadSignals),
-      );
-
-      if (!payloadClaim.claimed) {
-        flags.push({
-          code: "duplicate_payload",
-          severity: "medium",
-          explanation:
-            "A keyed signal for the normalized synthetic answers matches an earlier response in this survey version and segment.",
-        });
-      }
+    } else if (claim.status === "duplicate") {
+      flags.push({
+        code: "duplicate_payload",
+        severity: "medium",
+        explanation:
+          "A keyed signal for the normalized synthetic answers matches an earlier response in this survey version and segment.",
+      });
     }
   }
 
@@ -205,36 +199,48 @@ export async function screenSyntheticSubmission(
 }
 
 /**
- * Development-only store. `claimAny` has no await between inspection and write,
+ * Development-only store. `claim` has no await between inspection and write,
  * so concurrent calls in one JavaScript process cannot interleave the critical
  * section. Production requires one transactional database operation.
  */
-export class InMemoryAtomicSignalStore implements AtomicSignalStore {
-  readonly #signals = new Set<string>();
+export class InMemoryAtomicScreeningStore implements AtomicScreeningStore {
+  #idempotencySignals = new Set<string>();
+  #payloadSignals = new Set<string>();
 
-  async claimAny(signals: readonly string[]): Promise<{ claimed: boolean }> {
-    if (signals.length === 0 || new Set(signals).size !== signals.length) {
-      throw new Error("Atomic signal claim requires unique candidate signals");
+  async claim(input: {
+    idempotencySignals: readonly string[];
+    payloadSignals: readonly string[];
+  }): Promise<{ status: "accepted" | "replay" | "duplicate" }> {
+    if (
+      input.idempotencySignals.length === 0 ||
+      input.payloadSignals.length === 0 ||
+      new Set(input.idempotencySignals).size !==
+        input.idempotencySignals.length ||
+      new Set(input.payloadSignals).size !== input.payloadSignals.length
+    ) {
+      throw new Error(
+        "Atomic screening claim requires unique candidate signals",
+      );
+    }
+    if (
+      input.idempotencySignals.some((signal) =>
+        this.#idempotencySignals.has(signal),
+      )
+    ) {
+      return { status: "replay" };
     }
 
-    if (signals.some((candidate) => this.#signals.has(candidate))) {
-      return { claimed: false };
+    const duplicate = input.payloadSignals.some((signal) =>
+      this.#payloadSignals.has(signal),
+    );
+    const nextIdempotency = new Set(this.#idempotencySignals);
+    const nextPayload = new Set(this.#payloadSignals);
+    input.idempotencySignals.forEach((signal) => nextIdempotency.add(signal));
+    if (!duplicate) {
+      input.payloadSignals.forEach((signal) => nextPayload.add(signal));
     }
-
-    for (const candidate of signals) {
-      this.#signals.add(candidate);
-    }
-    return { claimed: true };
-  }
-
-  has(candidate: string): boolean {
-    for (const stored of this.#signals) {
-      const left = Buffer.from(stored);
-      const right = Buffer.from(candidate);
-      if (left.length === right.length && timingSafeEqual(left, right)) {
-        return true;
-      }
-    }
-    return false;
+    this.#idempotencySignals = nextIdempotency;
+    this.#payloadSignals = nextPayload;
+    return { status: duplicate ? "duplicate" : "accepted" };
   }
 }

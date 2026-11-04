@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,6 +9,10 @@ import {
   type LocalizedPreviewQuestion,
 } from "@/components/survey-preview";
 import { isLocale } from "@/lib/i18n";
+import {
+  isPublicPreviewIndexingEnabled,
+  localizedAlternates,
+} from "@/lib/public-site";
 import { getRegionalDictionary } from "@/lib/regional-translations";
 import { CONSENT_NOTICE_VERSION, getConsentNotice } from "@/lib/survey/consent";
 import { surveyPreviewCopy } from "@/lib/survey/preview-translations";
@@ -24,6 +29,26 @@ import { getDictionary } from "@/lib/translations";
 export const dynamic = "force-dynamic";
 
 type PageProps = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  const t = getRegionalDictionary(locale);
+  const indexingEnabled = isPublicPreviewIndexingEnabled();
+  return {
+    title: `${t.surveyPreview} | ${t.fatehgarhTitle} | Panjab 117`,
+    description: `${t.surveyBody} ${t.noIntake}`,
+    alternates: {
+      languages: localizedAlternates("/fatehgarh-sahib/survey"),
+    },
+    robots: {
+      index: indexingEnabled,
+      follow: indexingEnabled,
+    },
+  };
+}
 
 export default async function SurveyPreviewPage({ params }: PageProps) {
   const { locale } = await params;

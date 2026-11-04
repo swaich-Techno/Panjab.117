@@ -27,6 +27,9 @@ describe("provider-neutral editorial assistance", () => {
       }),
     ).rejects.toThrow("AI editorial assistance is disabled");
     expect(provider.createDraft).not.toHaveBeenCalled();
+    expect(aiAssistanceConfiguration.permitsConfidentialResponseData).toBe(
+      false,
+    );
   });
 
   it("creates an immutable review version when explicitly enabled", async () => {

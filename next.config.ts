@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+import { publicSecurityHeaders } from "./src/lib/security/public-headers";
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
@@ -7,18 +9,18 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
   async headers() {
+    const headers =
+      process.env.NODE_ENV === "production"
+        ? [...publicSecurityHeaders]
+        : publicSecurityHeaders.filter(
+            ({ key }) =>
+              key !== "Content-Security-Policy" &&
+              key !== "Strict-Transport-Security",
+          );
     return [
       {
         source: "/(.*)",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "DENY" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-        ],
+        headers,
       },
     ];
   },

@@ -31,6 +31,14 @@ describe("survey scheduling guard", () => {
       intakeEnabled: false,
       reason: "draft",
     });
+    expect(fatehgarhSahibDraftSchedule.launchApproved).toBe(false);
+    expect(Object.values(fatehgarhSahibDraftSchedule.approvals)).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+    ]);
   });
 
   it("uses an inclusive opening and exclusive closing boundary", () => {

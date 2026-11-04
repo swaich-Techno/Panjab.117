@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  InMemoryAtomicSignalStore,
+  InMemoryAtomicScreeningStore,
   ScreeningKeyRing,
   screenSyntheticSubmission,
   type RateLimiter,
@@ -37,8 +37,7 @@ const fixture = {
 function stores() {
   return {
     keyRing,
-    idempotencyStore: new InMemoryAtomicSignalStore(),
-    duplicateStore: new InMemoryAtomicSignalStore(),
+    screeningStore: new InMemoryAtomicScreeningStore(),
     rateLimiter: allowRateLimit,
   };
 }
@@ -112,30 +111,26 @@ describe("keyed atomic duplicate screening", () => {
   });
 
   it("detects a previous signal through a retained rotation key", async () => {
-    const idempotencyStore = new InMemoryAtomicSignalStore();
-    const duplicateStore = new InMemoryAtomicSignalStore();
+    const screeningStore = new InMemoryAtomicScreeningStore();
     const oldRing = new ScreeningKeyRing([
       { ...retainedKey, status: "active" },
     ]);
     await screenSyntheticSubmission(fixture, {
       keyRing: oldRing,
-      idempotencyStore,
-      duplicateStore,
+      screeningStore,
       rateLimiter: allowRateLimit,
     });
 
     const replayAfterRotation = await screenSyntheticSubmission(fixture, {
       keyRing,
-      idempotencyStore,
-      duplicateStore,
+      screeningStore,
       rateLimiter: allowRateLimit,
     });
     const duplicateAfterRotation = await screenSyntheticSubmission(
       { ...fixture, idempotencyKey: "synthetic-request-2" },
       {
         keyRing,
-        idempotencyStore,
-        duplicateStore,
+        screeningStore,
         rateLimiter: allowRateLimit,
       },
     );

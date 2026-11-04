@@ -1,4 +1,9 @@
-import { createHmac } from "node:crypto";
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+  timingSafeEqual,
+} from "node:crypto";
 
 import type { Locale } from "@/lib/i18n";
 
@@ -124,9 +129,23 @@ export const consentNotice: ConsentNotice = {
   ),
 };
 
+export const CONSENT_NOTICE_DIGEST = createHash("sha256")
+  .update(JSON.stringify(consentNotice), "utf8")
+  .digest("base64url");
+
+export const proposedAgePolicy = {
+  version: "fatehgarh-sahib-age-policy-2026-11-draft-1",
+  status: "human_legal_and_methodology_review_required",
+  minimumAge: 18,
+  collectionMethod: "self_attestation_without_date_of_birth",
+  approvedForCollection: false,
+} as const;
+
 export type ConsentRecord = {
   questionnaireVersion: typeof QUESTIONNAIRE_VERSION;
   noticeVersion: typeof CONSENT_NOTICE_VERSION;
+  noticeDigest: typeof CONSENT_NOTICE_DIGEST;
+  agePolicyVersion: typeof proposedAgePolicy.version;
   recordedAt: string;
   civicParticipation: true;
   politicalOpinion: boolean;
@@ -142,6 +161,8 @@ export function createSyntheticConsentRecord(input: {
   return {
     questionnaireVersion: QUESTIONNAIRE_VERSION,
     noticeVersion: CONSENT_NOTICE_VERSION,
+    noticeDigest: CONSENT_NOTICE_DIGEST,
+    agePolicyVersion: proposedAgePolicy.version,
     recordedAt: input.recordedAt,
     civicParticipation: true,
     politicalOpinion: input.politicalOpinion,
@@ -173,6 +194,128 @@ export type WithdrawalCase = {
   history: readonly { state: WithdrawalState; occurredAt: string }[];
   syntheticOnly: true;
 };
+
+export type WithdrawalCodeStatus = "active" | "redeemed" | "expired" | "locked";
+
+export type WithdrawalCodeRecord = {
+  syntheticResponseId: string;
+  digest: string;
+  keyId: string;
+  issuedAt: string;
+  expiresAt: string;
+  attempts: number;
+  maxAttempts: number;
+  status: WithdrawalCodeStatus;
+  syntheticOnly: true;
+};
+
+function withdrawalCodeDigest(code: string, key: Buffer): Buffer {
+  return createHmac("sha256", key).update(code, "utf8").digest();
+}
+
+export function issueSyntheticWithdrawalCode(
+  input: {
+    syntheticResponseId: string;
+    keyId: string;
+    issuedAt: string;
+    expiresAt: string;
+    maxAttempts?: number;
+  },
+  syntheticHmacKey: Buffer,
+  createCode: () => Buffer = () => randomBytes(24),
+): { participantCode: string; record: WithdrawalCodeRecord } {
+  if (syntheticHmacKey.length < 32) {
+    throw new Error("Withdrawal-code HMAC key must be at least 256 bits");
+  }
+  const issuedAt = Date.parse(input.issuedAt);
+  const expiresAt = Date.parse(input.expiresAt);
+  if (
+    !Number.isFinite(issuedAt) ||
+    !Number.isFinite(expiresAt) ||
+    expiresAt <= issuedAt
+  ) {
+    throw new Error("Withdrawal-code timestamps must define a valid lifetime");
+  }
+  const maxAttempts = input.maxAttempts ?? 5;
+  if (!Number.isInteger(maxAttempts) || maxAttempts < 1 || maxAttempts > 10) {
+    throw new Error("Withdrawal-code maxAttempts must be between 1 and 10");
+  }
+  const codeBytes = createCode();
+  if (codeBytes.length < 24) {
+    throw new Error(
+      "Withdrawal codes must contain at least 192 bits of entropy",
+    );
+  }
+  const participantCode = codeBytes.toString("base64url");
+  return {
+    participantCode,
+    record: {
+      syntheticResponseId: input.syntheticResponseId,
+      digest: withdrawalCodeDigest(participantCode, syntheticHmacKey).toString(
+        "base64url",
+      ),
+      keyId: input.keyId,
+      issuedAt: input.issuedAt,
+      expiresAt: input.expiresAt,
+      attempts: 0,
+      maxAttempts,
+      status: "active",
+      syntheticOnly: true,
+    },
+  };
+}
+
+export function verifySyntheticWithdrawalCode(
+  record: WithdrawalCodeRecord,
+  candidate: string,
+  checkedAt: string,
+  syntheticHmacKey: Buffer,
+): {
+  outcome: "verified" | "invalid" | "expired" | "locked" | "already_redeemed";
+  record: WithdrawalCodeRecord;
+} {
+  if (syntheticHmacKey.length < 32) {
+    throw new Error("Withdrawal-code HMAC key must be at least 256 bits");
+  }
+  if (record.status === "redeemed") {
+    return { outcome: "already_redeemed", record };
+  }
+  const checkedAtTime = Date.parse(checkedAt);
+  if (!Number.isFinite(checkedAtTime)) {
+    throw new Error("Withdrawal-code verification time must be valid");
+  }
+  if (checkedAtTime < Date.parse(record.issuedAt)) {
+    throw new Error("Withdrawal code is not yet valid");
+  }
+  if (
+    record.status === "expired" ||
+    checkedAtTime >= Date.parse(record.expiresAt)
+  ) {
+    return { outcome: "expired", record: { ...record, status: "expired" } };
+  }
+  if (record.status === "locked") {
+    return { outcome: "locked", record };
+  }
+
+  const expected = Buffer.from(record.digest, "base64url");
+  const supplied = withdrawalCodeDigest(candidate, syntheticHmacKey);
+  const verified =
+    expected.length === supplied.length && timingSafeEqual(expected, supplied);
+  const attempts = record.attempts + 1;
+
+  if (verified) {
+    return {
+      outcome: "verified",
+      record: { ...record, attempts, status: "redeemed" },
+    };
+  }
+
+  const status = attempts >= record.maxAttempts ? "locked" : "active";
+  return {
+    outcome: status === "locked" ? "locked" : "invalid",
+    record: { ...record, attempts, status },
+  };
+}
 
 const allowedTransitions: Readonly<
   Record<WithdrawalState, readonly WithdrawalState[]>

@@ -57,6 +57,12 @@ consent manipulation, keyed duplicate signals, atomic concurrency, withdrawal,
 complementary statistical suppression and the blockers that keep production
 intake disabled.
 
+Step 4B adds strict versioned input validation, signed CSRF proof semantics, a
+single atomic rate/idempotency/duplicate/response transaction, one-time
+withdrawal-code lifecycle controls and publication-level suppression. The
+production boundaries and residual blockers are recorded in
+[`STEP_4B_INTAKE_READINESS.md`](STEP_4B_INTAKE_READINESS.md).
+
 ## Accepted limitations
 
 Free-tier single-node failure, no PITR, no SLA, and capacity uncertainty remain High availability/recovery risks. They cannot be reduced by application code. Confidential production collection requires an explicit owner-signed risk acceptance or migration to paid HA, longer backups/PITR, monitoring, and support.

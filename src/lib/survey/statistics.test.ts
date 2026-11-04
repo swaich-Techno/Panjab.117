@@ -110,8 +110,8 @@ describe("deterministic survey statistics and disclosure control", () => {
       report.segments.map(({ assemblySegmentNumber }) => assemblySegmentNumber),
     ).toEqual([54, 55, 56, 57, 58, 59, 67, 69, 106]);
     expect(segment54).toMatchObject({
-      received: 4,
-      included: 2,
+      received: null,
+      included: null,
       pendingDuplicateReview: null,
       confirmedDuplicatesExcluded: null,
       totalsSuppressed: true,
@@ -119,6 +119,37 @@ describe("deterministic survey statistics and disclosure control", () => {
     expect(segment54.answerSummary).toMatchObject({
       denominator: null,
       missing: null,
+      totalsSuppressed: true,
+    });
+  });
+
+  it("suppresses related publication totals that could reconstruct a hidden cell", () => {
+    const responses: SyntheticSurveyResponse[] = [
+      ...Array.from({ length: 9 }, (_, index) => ({
+        id: `synthetic-included-${index}`,
+        assemblySegmentNumber: 54,
+        answers: { community_priority: index < 5 ? "roads" : "healthcare" },
+        duplicateReviewStatus: "included" as const,
+      })),
+      {
+        id: "synthetic-confirmed-duplicate",
+        assemblySegmentNumber: 54,
+        answers: { community_priority: "roads" },
+        duplicateReviewStatus: "confirmed_duplicate",
+      },
+    ];
+
+    const segment = createVoluntarySurveyReport(
+      responses,
+      "community_priority",
+      { smallCellThreshold: 3 },
+    ).segments[0]!;
+
+    expect(segment).toMatchObject({
+      received: null,
+      included: null,
+      pendingDuplicateReview: null,
+      confirmedDuplicatesExcluded: null,
       totalsSuppressed: true,
     });
   });

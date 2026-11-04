@@ -53,3 +53,8 @@ Copy `.env.example` to `.env.local` only when local configuration becomes necess
 - [Step 4A consent and withdrawal design](docs/security/STEP_4A_CONSENT_WITHDRAWAL.md)
 - [Step 4A intake threat model](docs/security/STEP_4A_INTAKE_THREAT_MODEL.md)
 - [Step 4A production gaps](docs/architecture/STEP_4A_PRODUCTION_GAPS.md)
+- [Step 4B public-preview deployment proposal](docs/architecture/STEP_4B_PUBLIC_PREVIEW_DEPLOYMENT.md)
+- [Step 4B synthetic intake readiness](docs/security/STEP_4B_INTAKE_READINESS.md)
+- [Public-preview launch gate](docs/checklists/STEP_4B_PUBLIC_PREVIEW_GATE.md)
+- [Live-collection launch gate](docs/checklists/STEP_4B_LIVE_COLLECTION_GATE.md)
+- [Step 4B verification](docs/evidence/STEP_4B_VERIFICATION.md)

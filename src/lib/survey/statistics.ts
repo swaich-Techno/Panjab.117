@@ -51,6 +51,10 @@ function publishCount(count: number, threshold: number): number | null {
   return count === 0 || count >= threshold ? count : null;
 }
 
+function isSmallPositive(count: number, threshold: number): boolean {
+  return count > 0 && count < threshold;
+}
+
 export function summarizeCategories(
   values: readonly (string | null | undefined)[],
   options: { smallCellThreshold: number; complementarySuppression?: boolean },
@@ -140,46 +144,48 @@ export function createVoluntarySurveyReport(
     const included = received.filter(
       ({ duplicateReviewStatus }) => duplicateReviewStatus === "included",
     );
+    const pendingDuplicateReview = received.filter(
+      ({ duplicateReviewStatus }) => duplicateReviewStatus === "pending_review",
+    ).length;
+    const confirmedDuplicatesExcluded = received.filter(
+      ({ duplicateReviewStatus }) =>
+        duplicateReviewStatus === "confirmed_duplicate",
+    ).length;
+    const answerSummary = summarizeCategories(
+      included.map(({ answers }) => answers[questionId]),
+      {
+        smallCellThreshold: options.smallCellThreshold,
+        complementarySuppression: true,
+      },
+    );
+    const relatedCounts = [
+      received.length,
+      included.length,
+      pendingDuplicateReview,
+      confirmedDuplicatesExcluded,
+    ];
+    const totalsSuppressed =
+      answerSummary.totalsSuppressed ||
+      relatedCounts.some((count) =>
+        isSmallPositive(count, options.smallCellThreshold),
+      );
 
     return {
       assemblySegmentNumber: segment.number,
-      received: publishCount(received.length, options.smallCellThreshold),
-      included: publishCount(included.length, options.smallCellThreshold),
-      pendingDuplicateReview: publishCount(
-        received.filter(
-          ({ duplicateReviewStatus }) =>
-            duplicateReviewStatus === "pending_review",
-        ).length,
-        options.smallCellThreshold,
-      ),
-      confirmedDuplicatesExcluded: publishCount(
-        received.filter(
-          ({ duplicateReviewStatus }) =>
-            duplicateReviewStatus === "confirmed_duplicate",
-        ).length,
-        options.smallCellThreshold,
-      ),
-      totalsSuppressed: [
-        received.length,
-        included.length,
-        received.filter(
-          ({ duplicateReviewStatus }) =>
-            duplicateReviewStatus === "pending_review",
-        ).length,
-        received.filter(
-          ({ duplicateReviewStatus }) =>
-            duplicateReviewStatus === "confirmed_duplicate",
-        ).length,
-      ].some(
-        (count) => publishCount(count, options.smallCellThreshold) === null,
-      ),
-      answerSummary: summarizeCategories(
-        included.map(({ answers }) => answers[questionId]),
-        {
-          smallCellThreshold: options.smallCellThreshold,
-          complementarySuppression: true,
-        },
-      ),
+      received: totalsSuppressed
+        ? null
+        : publishCount(received.length, options.smallCellThreshold),
+      included: totalsSuppressed
+        ? null
+        : publishCount(included.length, options.smallCellThreshold),
+      pendingDuplicateReview: totalsSuppressed
+        ? null
+        : publishCount(pendingDuplicateReview, options.smallCellThreshold),
+      confirmedDuplicatesExcluded: totalsSuppressed
+        ? null
+        : publishCount(confirmedDuplicatesExcluded, options.smallCellThreshold),
+      totalsSuppressed,
+      answerSummary,
     };
   });
 

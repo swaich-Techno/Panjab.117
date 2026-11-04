@@ -6,11 +6,15 @@ import { locales } from "@/lib/i18n";
 
 import {
   consentNotice,
+  CONSENT_NOTICE_DIGEST,
   CONSENT_NOTICE_VERSION,
   createSyntheticConsentRecord,
   createSyntheticWithdrawalCase,
   getConsentNotice,
+  issueSyntheticWithdrawalCode,
+  proposedAgePolicy,
   transitionWithdrawalCase,
+  verifySyntheticWithdrawalCode,
 } from "./consent";
 import { QUESTIONNAIRE_VERSION } from "./questionnaire";
 
@@ -38,8 +42,18 @@ describe("consent and withdrawal design", () => {
 
     expect(record.questionnaireVersion).toBe(QUESTIONNAIRE_VERSION);
     expect(record.noticeVersion).toBe(CONSENT_NOTICE_VERSION);
+    expect(record.noticeDigest).toBe(CONSENT_NOTICE_DIGEST);
+    expect(record.noticeDigest).toHaveLength(43);
     expect(record.politicalOpinion).toBe(false);
     expect(record.status).toBe("synthetic_preview_only");
+  });
+
+  it("keeps the proposed age policy unapproved and avoids date-of-birth collection", () => {
+    expect(proposedAgePolicy).toMatchObject({
+      minimumAge: 18,
+      collectionMethod: "self_attestation_without_date_of_birth",
+      approvedForCollection: false,
+    });
   });
 
   it("never retains a raw withdrawal locator", () => {
@@ -112,5 +126,75 @@ describe("consent and withdrawal design", () => {
         "2026-11-03T12:01:00.000Z",
       ),
     ).toThrow("Invalid withdrawal transition");
+  });
+
+  it("issues a one-time withdrawal code without retaining its raw value", () => {
+    const key = Buffer.alloc(32, 4);
+    const { participantCode, record } = issueSyntheticWithdrawalCode(
+      {
+        syntheticResponseId: "synthetic-response-1",
+        keyId: "synthetic-withdrawal-k1",
+        issuedAt: "2026-11-05T00:00:00.000Z",
+        expiresAt: "2027-11-16T00:00:00.000Z",
+      },
+      key,
+      () => Buffer.alloc(24, 5),
+    );
+
+    expect(JSON.stringify(record)).not.toContain(participantCode);
+    const verified = verifySyntheticWithdrawalCode(
+      record,
+      participantCode,
+      "2026-11-06T00:00:00.000Z",
+      key,
+    );
+    expect(verified.outcome).toBe("verified");
+    expect(verified.record.status).toBe("redeemed");
+    expect(
+      verifySyntheticWithdrawalCode(
+        verified.record,
+        participantCode,
+        "2026-11-06T00:01:00.000Z",
+        key,
+      ).outcome,
+    ).toBe("already_redeemed");
+  });
+
+  it("expires and locks withdrawal codes without revealing a match", () => {
+    const key = Buffer.alloc(32, 6);
+    const issued = issueSyntheticWithdrawalCode(
+      {
+        syntheticResponseId: "synthetic-response-2",
+        keyId: "synthetic-withdrawal-k1",
+        issuedAt: "2026-11-05T00:00:00.000Z",
+        expiresAt: "2026-11-10T00:00:00.000Z",
+        maxAttempts: 2,
+      },
+      key,
+      () => Buffer.alloc(24, 7),
+    );
+
+    const first = verifySyntheticWithdrawalCode(
+      issued.record,
+      "wrong-code-1",
+      "2026-11-06T00:00:00.000Z",
+      key,
+    );
+    const second = verifySyntheticWithdrawalCode(
+      first.record,
+      "wrong-code-2",
+      "2026-11-06T00:01:00.000Z",
+      key,
+    );
+    expect(first.outcome).toBe("invalid");
+    expect(second.outcome).toBe("locked");
+
+    const expired = verifySyntheticWithdrawalCode(
+      issued.record,
+      issued.participantCode,
+      "2026-11-10T00:00:00.000Z",
+      key,
+    );
+    expect(expired.outcome).toBe("expired");
   });
 });
