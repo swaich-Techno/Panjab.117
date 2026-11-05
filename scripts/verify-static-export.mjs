@@ -2,7 +2,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
 const outputRoot = path.resolve("out");
-const locales = ["en", "pa", "hi"];
+const locales = ["pa", "hi", "en"];
 const regions = ["majha", "malwa", "doaba", "puadh"];
 const routes = locales.flatMap((locale) => [
   `/${locale}`,
@@ -101,6 +101,10 @@ for (const route of routes) {
   if (route.endsWith("/survey")) {
     assert(!/<form[\s>]/i.test(html), `Survey form found in ${route}`);
     assert(
+      !html.includes("5 Nov 2026") && !html.includes("15 Nov 2026"),
+      `Obsolete proposed participation dates found in ${route}`,
+    );
+    assert(
       html.includes("fatehgarh-sahib-civic-2026-11-draft-1") &&
         html.includes("fatehgarh-sahib-consent-2026-11-draft-1"),
       `Missing versioned preview evidence in ${route}`,
@@ -130,7 +134,7 @@ assert(
 
 const redirects = await readFile(path.join(outputRoot, "_redirects"), "utf8");
 assert(
-  redirects.includes("/ /en/ 302"),
+  redirects.includes("/ /pa/ 302"),
   "Root redirect is missing or not temporary",
 );
 

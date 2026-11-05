@@ -51,7 +51,7 @@ export default async function FatehgarhSahibPage({ params }: PageProps) {
             <p className="mt-10 text-xs font-bold tracking-[0.16em] text-[#e6c56c] uppercase">
               {t.fatehgarhEyebrow}
             </p>
-            <h1 className="mt-4 max-w-4xl font-serif text-5xl font-bold tracking-tight sm:text-6xl">
+            <h1 className="mt-4 max-w-4xl break-words font-serif text-4xl leading-tight font-bold tracking-tight sm:text-6xl">
               {t.fatehgarhTitle}
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-200">

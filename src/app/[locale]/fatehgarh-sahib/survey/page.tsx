@@ -20,10 +20,6 @@ import {
   fatehgarhSahibQuestionnaire,
   QUESTIONNAIRE_VERSION,
 } from "@/lib/survey/questionnaire";
-import {
-  fatehgarhSahibDraftSchedule,
-  getSurveyAvailability,
-} from "@/lib/survey/schedule";
 import { getDictionary } from "@/lib/translations";
 
 type PageProps = { params: Promise<{ locale: string }> };
@@ -53,10 +49,6 @@ export default async function SurveyPreviewPage({ params }: PageProps) {
   if (!isLocale(locale)) notFound();
   const t = getRegionalDictionary(locale);
   const base = getDictionary(locale);
-  const availability = getSurveyAvailability(
-    fatehgarhSahibDraftSchedule,
-    new Date(fatehgarhSahibDraftSchedule.opensAt),
-  );
   const localizedQuestions: LocalizedPreviewQuestion[] =
     fatehgarhSahibQuestionnaire.questions.map((question) => ({
       id: question.id,
@@ -86,7 +78,7 @@ export default async function SurveyPreviewPage({ params }: PageProps) {
           <p className="mt-10 text-xs font-bold tracking-[0.16em] text-[#8b6c2f] uppercase">
             {t.surveyEyebrow}
           </p>
-          <h1 className="mt-4 max-w-4xl font-serif text-5xl font-bold tracking-tight text-[#0d2137] sm:text-6xl">
+          <h1 className="mt-4 max-w-4xl break-words font-serif text-4xl leading-tight font-bold tracking-tight text-[#0d2137] sm:text-6xl">
             {t.surveyTitle}
           </h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-700">
@@ -107,41 +99,15 @@ export default async function SurveyPreviewPage({ params }: PageProps) {
               >
                 {t.unavailable}
               </h2>
-              <p className="mt-3 text-sm text-slate-300">
-                {availability.intakeEnabled ? t.proposedWindow : t.approvalGate}
-              </p>
+              <p className="mt-3 text-sm text-slate-300">{t.approvalGate}</p>
             </div>
-            <div className="grid gap-6 p-6 sm:grid-cols-3 sm:p-8">
-              <div>
-                <p className="text-xs font-bold tracking-wide text-[#8b6c2f] uppercase">
-                  {t.opens}
-                </p>
-                <time
-                  className="mt-2 block font-semibold text-[#0d2137]"
-                  dateTime={fatehgarhSahibDraftSchedule.opensAt}
-                >
-                  5 Nov 2026, 00:00
-                </time>
-              </div>
-              <div>
-                <p className="text-xs font-bold tracking-wide text-[#8b6c2f] uppercase">
-                  {t.closes}
-                </p>
-                <time
-                  className="mt-2 block font-semibold text-[#0d2137]"
-                  dateTime={fatehgarhSahibDraftSchedule.closesAtExclusive}
-                >
-                  15 Nov 2026, 23:59:59
-                </time>
-              </div>
-              <div>
-                <p className="text-xs font-bold tracking-wide text-[#8b6c2f] uppercase">
-                  {t.timezone}
-                </p>
-                <p className="mt-2 font-semibold text-[#0d2137]">
-                  Asia/Kolkata (UTC+05:30)
-                </p>
-              </div>
+            <div className="p-6 sm:p-8">
+              <p className="text-xs font-bold tracking-wide text-[#8b6c2f] uppercase">
+                {t.proposedWindow}
+              </p>
+              <p className="mt-2 max-w-3xl font-semibold leading-7 text-[#0d2137]">
+                {t.surveyBody}
+              </p>
             </div>
           </section>
 

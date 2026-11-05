@@ -20,7 +20,7 @@ export function SiteHeader({ dictionary: t, locale }: SiteHeaderProps) {
 
   return (
     <header className="border-b border-[#d8c9a5] bg-[#f8f4e9]/95">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-12">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-4 sm:gap-4 sm:px-8 lg:px-12">
         <Link
           className="rounded-sm font-serif text-xl font-bold tracking-tight text-[#0d2137] outline-none focus-visible:ring-2 focus-visible:ring-[#b08d46] focus-visible:ring-offset-4"
           href={`/${locale}`}
@@ -28,7 +28,7 @@ export function SiteHeader({ dictionary: t, locale }: SiteHeaderProps) {
           {t.siteName}
           <span className="ml-2 inline-block h-2 w-2 rounded-full bg-[#b08d46]" />
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           <nav aria-label={t.navigationLabel} className="hidden lg:block">
             <ul className="flex items-center gap-6 text-sm font-semibold text-stone-700">
               {navItems.map(([href, label]) => (
@@ -48,9 +48,9 @@ export function SiteHeader({ dictionary: t, locale }: SiteHeaderProps) {
       </div>
       <nav
         aria-label={t.navigationLabel}
-        className="overflow-x-auto border-t border-stone-200 lg:hidden"
+        className="border-t border-stone-200 lg:hidden"
       >
-        <ul className="mx-auto flex w-max min-w-full items-center gap-6 px-5 py-3 text-sm font-semibold text-stone-700 sm:px-8">
+        <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-x-4 gap-y-1 px-4 py-3 text-sm font-semibold text-stone-700 sm:flex sm:items-center sm:gap-6 sm:px-8">
           {navItems.map(([href, label]) => (
             <li key={href}>
               <Link

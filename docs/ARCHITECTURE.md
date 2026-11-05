@@ -18,7 +18,7 @@ Most components render on the server. `LanguageSelector` is the only client comp
 
 ## Routing and internationalization
 
-Every public page is prefixed by one of the supported locales: `en`, `pa` or `hi`. The proxy redirects unprefixed requests to English. The dynamic locale root layout validates the route, sets the document `lang` attribute and supplies localized metadata. Translation dictionaries are typed so missing keys fail during development, and a test verifies their runtime alignment.
+Every public page is prefixed by one of the supported locales: Punjabi (`pa`), Hindi (`hi`) or English (`en`), in that public priority order. Hosting redirects unprefixed requests to Punjabi. The dynamic locale root layout validates the route, sets the document `lang` attribute and supplies localized metadata. Translation dictionaries are typed so missing keys fail during development, and a test verifies their runtime alignment.
 
 Fonts use Unicode-capable local system stacks. This avoids a third-party font request and keeps the initial build deployable without a font service. A later brand phase may self-host approved Gurmukhi and Devanagari font files.
 

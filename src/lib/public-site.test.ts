@@ -82,8 +82,13 @@ describe("public preview readiness", () => {
       new URL("../../public/_redirects", import.meta.url),
       "utf8",
     );
+    const staticPreviewServer = readFileSync(
+      new URL("../../scripts/serve-static.mjs", import.meta.url),
+      "utf8",
+    );
 
-    expect(cloudflareRedirects).toContain("/ /en/ 302");
+    expect(cloudflareRedirects).toContain("/ /pa/ 302");
     expect(cloudflareRedirects).not.toContain(" 200");
+    expect(staticPreviewServer).toContain('Location: "/pa/"');
   });
 });

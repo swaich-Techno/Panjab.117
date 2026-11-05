@@ -30,7 +30,7 @@ export function LanguageSelector({
   }
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="relative flex min-w-0 items-center gap-2">
       <label className="sr-only" htmlFor="language-selector">
         {label}
       </label>
@@ -41,7 +41,7 @@ export function LanguageSelector({
         {currentLocale.toUpperCase()}
       </span>
       <select
-        className="min-h-11 cursor-pointer appearance-none rounded-full border border-stone-300 bg-white py-2 pr-9 pl-4 text-sm font-semibold text-stone-800 shadow-sm outline-none transition focus-visible:border-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+        className="min-h-11 max-w-[9.25rem] cursor-pointer appearance-none rounded-full border border-stone-300 bg-white py-2 pr-9 pl-4 text-sm font-semibold text-stone-800 shadow-sm outline-none transition focus:border-emerald-700 focus:outline-2 focus:outline-solid focus:outline-offset-2 focus:outline-emerald-700 sm:max-w-none"
         id="language-selector"
         onChange={handleChange}
         value={currentLocale}

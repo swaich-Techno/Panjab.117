@@ -10,7 +10,7 @@ The project uses the Next.js App Router and server components by default. Client
 
 **Status:** Accepted
 
-English, Punjabi and Hindi use `/en`, `/pa` and `/hi`. Explicit locale URLs are shareable, cacheable and allow each document to carry the correct language metadata. English is the default redirect, not an unprefixed duplicate.
+Punjabi, Hindi and English use `/pa`, `/hi` and `/en`. Explicit locale URLs are shareable, cacheable and allow each document to carry the correct language metadata. Punjabi is the default redirect, not an unprefixed duplicate. Language navigation follows the same Punjabi, Hindi, English priority order.
 
 ## 003 — Typed in-repository dictionaries for the foundation
 

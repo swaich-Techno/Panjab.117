@@ -21,4 +21,13 @@ describe("regional translations", () => {
       /[\u0900-\u097F]/u,
     );
   });
+
+  it.each(locales)(
+    "distinguishes the three-seat district from the nine-seat parliamentary constituency in %s",
+    (locale) => {
+      const dictionary = regionalDictionaries[locale];
+      expect(dictionary.fatehgarhBody).toMatch(/3|three|ਤਿੰਨ|तीन/u);
+      expect(dictionary.fatehgarhBody).toMatch(/9|nine|ਨੌਂ|नौ/u);
+    },
+  );
 });
