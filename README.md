@@ -58,6 +58,14 @@ npm run test:security:intake
 npm run build
 ```
 
+## Step 5E synthetic staging
+
+Step 5E adds a loopback-only HTTPS browser harness and production integration contracts for local synthetic verification. It is not part of the public Next.js route tree or Cloudflare export. Production collection, all operational approvals and AI remain disabled. The ₹0 development architecture is not approved for confidential participant data.
+
+```bash
+npm run test:step5e
+```
+
 Copy `.env.example` to `.env.local` only when local configuration becomes necessary. Never commit `.env.local` or place secrets in variables prefixed with `NEXT_PUBLIC_`.
 
 ## Documentation
@@ -99,3 +107,11 @@ Copy `.env.example` to `.env.local` only when local configuration becomes necess
 - [Step 5C deployment plan](docs/deployment/STEP_5C_DEPLOYMENT_PLAN.md)
 - [Step 5C cost estimate](docs/finance/STEP_5C_COST_ESTIMATE.md)
 - [Step 5C verification](docs/evidence/STEP_5C_VERIFICATION.md)
+- [Step 5E implementation](docs/development/STEP_5E_IMPLEMENTATION.md)
+- [Step 5E staging architecture](docs/architecture/STEP_5E_STAGING_ARCHITECTURE.md)
+- [Step 5E end-to-end verification](docs/evidence/STEP_5E_END_TO_END_VERIFICATION.md)
+- [Step 5E production security gaps](docs/security/STEP_5E_PRODUCTION_SECURITY_GAPS.md)
+- [Step 5E zero-budget comparison](docs/finance/STEP_5E_COST_COMPARISON.md)
+- [Step 5E independent review pack](docs/review/STEP_5E_INDEPENDENT_REVIEW_PACK.md)
+- [Step 5E launch operations](docs/deployment/STEP_5E_LAUNCH_OPERATIONS.md)
+- [Step 5E verification](docs/evidence/STEP_5E_VERIFICATION.md)

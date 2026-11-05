@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <title>Panjab 117 — Step 5E synthetic staging</title>
+    <style nonce="__STEP5E_NONCE__">
+      :root {
+        color-scheme: light;
+        font-family: system-ui, sans-serif;
+        background: #f5f1e8;
+        color: #14283b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      main {
+        width: min(48rem, calc(100% - 2rem));
+        margin: 2rem auto;
+      }
+      .banner,
+      form,
+      .receipt {
+        border: 1px solid #b9a66d;
+        border-radius: 1rem;
+        background: #fff;
+        padding: 1.25rem;
+      }
+      .banner {
+        background: #fff6d7;
+        margin-bottom: 1rem;
+      }
+      h1 {
+        font-size: clamp(1.7rem, 6vw, 2.7rem);
+        margin: 0 0 0.75rem;
+      }
+      h2 {
+        font-size: 1.2rem;
+        margin-top: 1.7rem;
+      }
+      label,
+      legend {
+        font-weight: 650;
+      }
+      label {
+        display: block;
+        margin-top: 1rem;
+      }
+      fieldset {
+        border: 0;
+        margin: 1.25rem 0;
+        padding: 0;
+      }
+      select {
+        width: 100%;
+        margin-top: 0.4rem;
+        padding: 0.75rem;
+        font: inherit;
+      }
+      .choice {
+        display: flex;
+        gap: 0.65rem;
+        align-items: flex-start;
+        font-weight: 450;
+      }
+      .choice input {
+        margin-top: 0.25rem;
+      }
+      button {
+        border: 0;
+        border-radius: 0.6rem;
+        padding: 0.75rem 1rem;
+        background: #173a5e;
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0f2943;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 3px solid #d97706;
+        outline-offset: 3px;
+      }
+      button[disabled] {
+        opacity: 0.55;
+        cursor: wait;
+      }
+      .status {
+        min-height: 1.6em;
+        font-weight: 650;
+      }
+      .receipt {
+        margin-top: 1rem;
+        overflow-wrap: anywhere;
+      }
+      .muted {
+        color: #475569;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="banner" role="note">
+        <strong>Local synthetic staging only.</strong> No genuine participant
+        data. Data stays in this process memory and is erased when the server
+        stops. Production collection and AI remain disabled.
+      </div>
+      <h1>Panjab 117 secure survey staging</h1>
+      <p class="muted">
+        This separate loopback HTTPS harness exercises consent, intake, receipt
+        and withdrawal behavior without changing the public Cloudflare website.
+      </p>
+      <form id="survey" novalidate>
+        <label for="locale">Language</label>
+        <select id="locale" required>
+          <option value="en">English</option>
+          <option value="pa">ਪੰਜਾਬੀ</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+
+        <label for="segment">Fatehgarh Sahib Assembly segment</label>
+        <select id="segment" required>
+          <option value="">Select a synthetic test segment</option>
+          <option value="54">54 — Bassi Pathana</option>
+          <option value="55">55 — Fatehgarh Sahib</option>
+          <option value="56">56 — Amloh</option>
+          <option value="57">57 — Khanna</option>
+          <option value="58">58 — Samrala</option>
+          <option value="59">59 — Sahnewal</option>
+          <option value="67">67 — Payal</option>
+          <option value="69">69 — Raikot</option>
+          <option value="106">106 — Amargarh</option>
+        </select>
+
+        <h2>Consent for synthetic testing</h2>
+        <label class="choice"
+          ><input id="age" type="checkbox" /> I confirm this is synthetic
+          testing by an adult tester.</label
+        >
+        <label class="choice"
+          ><input id="civic" type="checkbox" /> I voluntarily consent to this
+          synthetic civic test.</label
+        >
+        <fieldset>
+          <legend>Optional synthetic political-opinion test</legend>
+          <label class="choice"
+            ><input name="political" type="radio" value="yes" /> Include the
+            optional synthetic question.</label
+          >
+          <label class="choice"
+            ><input name="political" type="radio" value="no" /> Do not include
+            it.</label
+          >
+        </fieldset>
+
+        <label for="healthcare">Synthetic healthcare-access answer</label>
+        <select id="healthcare" required>
+          <option value="">Select</option>
+          <option value="good">Good</option>
+          <option value="fair">Fair</option>
+          <option value="poor">Poor</option>
+        </select>
+
+        <button id="submit" type="submit">Submit synthetic response</button>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </form>
+      <section
+        id="receipt"
+        class="receipt"
+        hidden
+        aria-labelledby="receipt-heading"
+      >
+        <h2 id="receipt-heading" tabindex="-1">Synthetic receipt</h2>
+        <p><strong>Response ID:</strong> <span id="response-id"></span></p>
+        <p>
+          <strong>Withdrawal code:</strong> <span id="withdrawal-code"></span>
+        </p>
+        <button id="withdraw" type="button">Withdraw synthetic response</button>
+      </section>
+    </main>
+    <script nonce="__STEP5E_NONCE__">
+      const csrf = "__STEP5E_CSRF__";
+      const form = document.querySelector("#survey");
+      const submit = document.querySelector("#submit");
+      const status = document.querySelector("#status");
+      const receipt = document.querySelector("#receipt");
+      const responseId = document.querySelector("#response-id");
+      const withdrawalCode = document.querySelector("#withdrawal-code");
+      const withdraw = document.querySelector("#withdraw");
+      let activeReceipt = null;
+      const opaqueToken = () => crypto.randomUUID().replaceAll("-", "");
+      const secret = () => {
+        const bytes = crypto.getRandomValues(new Uint8Array(32));
+        return btoa(String.fromCharCode(...bytes))
+          .replaceAll("+", "-")
+          .replaceAll("/", "_")
+          .replace(/=+$/u, "");
+      };
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const political = document.querySelector(
+          "input[name=political]:checked",
+        );
+        if (
+          !form.checkValidity() ||
+          !document.querySelector("#age").checked ||
+          !document.querySelector("#civic").checked ||
+          !political
+        ) {
+          status.textContent =
+            "Complete the required synthetic consent and test fields.";
+          form.reportValidity();
+          return;
+        }
+        submit.disabled = true;
+        status.textContent = "Submitting synthetic response…";
+        const withdrawalSecret = secret();
+        try {
+          const result = await fetch("/synthetic-intake", {
+            method: "POST",
+            cache: "no-store",
+            credentials: "same-origin",
+            referrerPolicy: "no-referrer",
+            headers: {
+              "content-type": "application/json",
+              "x-step5e-csrf": csrf,
+            },
+            body: JSON.stringify({
+              syntheticOnly: true,
+              locale: document.querySelector("#locale").value,
+              assemblySegment: document.querySelector("#segment").value,
+              ageConfirmed: true,
+              civicConsent: true,
+              politicalConsent: political.value === "yes",
+              healthcare: document.querySelector("#healthcare").value,
+              idempotencyKey: opaqueToken(),
+              withdrawalSecret,
+            }),
+          });
+          const body = await result.json();
+          if (!result.ok) throw new Error("Synthetic intake rejected");
+          activeReceipt = body;
+          responseId.textContent = body.responseId;
+          withdrawalCode.textContent = body.withdrawalCode;
+          receipt.hidden = false;
+          status.textContent = "Synthetic response accepted in process memory.";
+          document.querySelector("#receipt-heading").focus();
+        } catch {
+          status.textContent =
+            "The synthetic response could not be accepted. Retry safely.";
+        } finally {
+          submit.disabled = false;
+        }
+      });
+      withdraw.addEventListener("click", async () => {
+        if (!activeReceipt) return;
+        withdraw.disabled = true;
+        const result = await fetch("/withdraw", {
+          method: "POST",
+          cache: "no-store",
+          credentials: "same-origin",
+          referrerPolicy: "no-referrer",
+          headers: {
+            "content-type": "application/json",
+            "x-step5e-csrf": csrf,
+          },
+          body: JSON.stringify({
+            responseId: activeReceipt.responseId,
+            withdrawalCode: activeReceipt.withdrawalCode,
+          }),
+        });
+        if (result.ok) {
+          activeReceipt = null;
+          receipt.hidden = true;
+          responseId.textContent = "";
+          withdrawalCode.textContent = "";
+          status.textContent =
+            "Synthetic response withdrawn and deleted from process memory.";
+          submit.focus();
+        } else {
+          status.textContent = "Synthetic withdrawal could not be verified.";
+        }
+        withdraw.disabled = false;
+      });
+    </script>
+  </body>
+</html>
