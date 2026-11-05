@@ -11,6 +11,7 @@ import {
 import { isLocale } from "@/lib/i18n";
 import { localizedAlternates } from "@/lib/public-site";
 import { getRegionalDictionary } from "@/lib/regional-translations";
+import { getRegistrationPreviewCopy } from "@/lib/registration/translations";
 import { getDictionary } from "@/lib/translations";
 
 type PageProps = { params: Promise<{ locale: string }> };
@@ -35,6 +36,7 @@ export default async function FatehgarhSahibPage({ params }: PageProps) {
   if (!isLocale(locale)) notFound();
   const t = getRegionalDictionary(locale);
   const base = getDictionary(locale);
+  const registrationCopy = getRegistrationPreviewCopy(locale);
 
   return (
     <>
@@ -95,12 +97,20 @@ export default async function FatehgarhSahibPage({ params }: PageProps) {
                 {fatehgarhSahibParliamentaryGroup.source.label}
               </a>
             </p>
-            <Link
-              className="button-primary shrink-0"
-              href={`/${locale}/fatehgarh-sahib/survey`}
-            >
-              {t.surveyPreview} <span aria-hidden="true">→</span>
-            </Link>
+            <div className="flex shrink-0 flex-col gap-3 sm:items-end">
+              <Link
+                className="button-primary"
+                href={`/${locale}/fatehgarh-sahib/survey`}
+              >
+                {t.surveyPreview} <span aria-hidden="true">→</span>
+              </Link>
+              <Link
+                className="font-bold text-[#173a5e] underline decoration-[#b08d46] decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700"
+                href={`/${locale}/fatehgarh-sahib/registration-preview`}
+              >
+                {registrationCopy.entryLink} <span aria-hidden="true">→</span>
+              </Link>
+            </div>
           </div>
         </section>
       </main>

@@ -9,6 +9,7 @@ const routes = locales.flatMap((locale) => [
   ...regions.map((region) => `/${locale}/regions/${region}`),
   `/${locale}/fatehgarh-sahib`,
   `/${locale}/fatehgarh-sahib/survey`,
+  `/${locale}/fatehgarh-sahib/registration-preview`,
 ]);
 
 function assert(condition, message) {
@@ -58,7 +59,7 @@ async function walk(directory) {
   return files;
 }
 
-assert(routes.length === 21, "Expected exactly 21 public preview routes");
+assert(routes.length === 24, "Expected exactly 24 public preview routes");
 assert(
   await fileExists(path.join(outputRoot, "404.html")),
   "Missing static 404 page",
@@ -108,6 +109,20 @@ for (const route of routes) {
       html.includes("fatehgarh-sahib-civic-2026-11-draft-1") &&
         html.includes("fatehgarh-sahib-consent-2026-11-draft-1"),
       `Missing versioned preview evidence in ${route}`,
+    );
+  }
+  if (route.endsWith("/registration-preview")) {
+    assert(
+      !/<form[\s>]/i.test(html),
+      `Registration submission form found in ${route}`,
+    );
+    assert(
+      html.includes("SYNTHETIC") || html.includes("synthetic"),
+      `Synthetic-only notice missing from ${route}`,
+    );
+    assert(
+      !html.includes("/api/"),
+      `Registration API reference found in ${route}`,
     );
   }
 

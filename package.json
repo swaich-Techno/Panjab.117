@@ -16,6 +16,7 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:registration": "vitest run src/lib/registration",
     "test:security:mysql": "vitest run src/lib/security/mysql.integration.test.ts",
     "test:watch": "vitest",
     "format": "prettier --write .",

@@ -6,6 +6,7 @@ export const publicPreviewRoutes = locales.flatMap((locale) => [
   ...regions.map((region) => `/${locale}/regions/${region}`),
   `/${locale}/fatehgarh-sahib`,
   `/${locale}/fatehgarh-sahib/survey`,
+  `/${locale}/fatehgarh-sahib/registration-preview`,
 ]);
 
 export function getPublicSiteOrigin(

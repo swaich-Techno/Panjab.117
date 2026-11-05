@@ -10,9 +10,12 @@ import {
 
 describe("public preview readiness", () => {
   it("enumerates every multilingual public route without an intake endpoint", () => {
-    expect(publicPreviewRoutes).toHaveLength(21);
-    expect(new Set(publicPreviewRoutes).size).toBe(21);
+    expect(publicPreviewRoutes).toHaveLength(24);
+    expect(new Set(publicPreviewRoutes).size).toBe(24);
     expect(publicPreviewRoutes).toContain("/en/fatehgarh-sahib/survey");
+    expect(publicPreviewRoutes).toContain(
+      "/en/fatehgarh-sahib/registration-preview",
+    );
     expect(publicPreviewRoutes.some((route) => route.includes("/api/"))).toBe(
       false,
     );
