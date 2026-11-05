@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Locale } from "@/lib/i18n";
 import type { SurveyPreviewCopy } from "@/lib/survey/preview-translations";
@@ -88,6 +88,7 @@ export function SurveyPreview({
   const retryTokens = useRef<{
     idempotencyKey: string;
     privacyScopeToken: string;
+    withdrawalSecret: string;
   } | null>(null);
 
   const stages = useMemo<readonly PreviewStage[]>(() => {
@@ -118,6 +119,10 @@ export function SurveyPreview({
 
   const stage = stages[Math.min(currentIndex, stages.length - 1)]!;
   const progress = Math.round(((currentIndex + 1) / stages.length) * 100);
+
+  useEffect(() => {
+    document.getElementById("preview-heading")?.focus();
+  }, [currentIndex, receipt]);
 
   function goBack() {
     setError("");
@@ -220,6 +225,15 @@ export function SurveyPreview({
       (retryTokens.current = {
         idempotencyKey: crypto.randomUUID().replaceAll("-", ""),
         privacyScopeToken: crypto.randomUUID().replaceAll("-", ""),
+        withdrawalSecret: (() => {
+          const bytes = crypto.getRandomValues(new Uint8Array(32));
+          return btoa(
+            Array.from(bytes, (value) => String.fromCharCode(value)).join(""),
+          )
+            .replaceAll("+", "-")
+            .replaceAll("/", "_")
+            .replace(/=+$/u, "");
+        })(),
       });
     const civicQuestionIds = new Set(
       questions
@@ -291,6 +305,7 @@ export function SurveyPreview({
   return (
     <section
       aria-labelledby="preview-heading"
+      aria-busy={submitting}
       className="mt-12 overflow-hidden rounded-3xl border border-[#d8c9a5] bg-white shadow-[0_24px_70px_rgba(13,33,55,0.1)]"
     >
       <div className="border-b border-[#d8c9a5] bg-[#fffaf0] p-5 sm:p-7">
@@ -326,6 +341,7 @@ export function SurveyPreview({
             <h2
               className="mt-4 font-serif text-3xl font-bold text-[#0d2137]"
               id="preview-heading"
+              tabIndex={-1}
             >
               {consent.title}
             </h2>
@@ -389,6 +405,7 @@ export function SurveyPreview({
             <legend
               className="font-serif text-3xl font-bold leading-tight text-[#0d2137]"
               id="preview-heading"
+              tabIndex={-1}
             >
               {stage.question.prompt}
             </legend>
@@ -440,6 +457,7 @@ export function SurveyPreview({
             <legend
               className="font-serif text-3xl font-bold leading-tight text-[#0d2137]"
               id="preview-heading"
+              tabIndex={-1}
             >
               {consent.politicalTitle}
             </legend>
@@ -493,6 +511,7 @@ export function SurveyPreview({
             <h2
               className="font-serif text-3xl font-bold text-[#0d2137]"
               id="preview-heading"
+              tabIndex={-1}
             >
               {copy.receiptTitle}
             </h2>
@@ -512,6 +531,9 @@ export function SurveyPreview({
             </dl>
             <p className="mt-4 font-semibold text-[#9c2f1b]">
               {copy.receiptWarning}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-700">
+              {copy.withdrawalInstructions}
             </p>
           </div>
         ) : null}
@@ -563,14 +585,22 @@ export function SurveyPreview({
                 })}
             </dl>
             {collectionTransport ? (
-              <button
-                className="button-primary mt-7 disabled:cursor-wait disabled:opacity-60"
-                disabled={submitting}
-                onClick={() => void submitCollection()}
-                type="button"
-              >
-                {submitting ? copy.submitting : copy.submit}
-              </button>
+              <div className="mt-7">
+                <p className="mb-4 text-sm leading-6 text-slate-700">
+                  {copy.retrySafety}
+                </p>
+                <button
+                  className="button-primary disabled:cursor-wait disabled:opacity-60"
+                  disabled={submitting}
+                  onClick={() => void submitCollection()}
+                  type="button"
+                >
+                  {submitting ? copy.submitting : copy.submit}
+                </button>
+                <p aria-live="polite" className="sr-only" role="status">
+                  {submitting ? copy.submitting : ""}
+                </p>
+              </div>
             ) : (
               <p className="mt-4 text-sm font-bold text-[#9c2f1b]">
                 {copy.noSubmission}

@@ -15,8 +15,12 @@ const hardening = readFileSync(
   resolve("database/migrations/mysql/0003_step_5b_verification_hardening.sql"),
   "utf8",
 );
+const step5d = readFileSync(
+  resolve("database/migrations/mysql/0004_step_5d_audit_outbox.sql"),
+  "utf8",
+);
 
-describe("Step 5A and Step 5B MySQL migration contract", () => {
+describe("Step 5A through Step 5D MySQL migration contract", () => {
   it("separates civic and political ciphertext and constrains all nine segments", () => {
     expect(schema).toContain("CREATE TABLE survey_civic_payloads");
     expect(schema).toContain("CREATE TABLE survey_political_payloads");
@@ -70,5 +74,19 @@ describe("Step 5A and Step 5B MySQL migration contract", () => {
       "GRANT SELECT (response_id, withdrawal_state), UPDATE (withdrawal_state)",
     );
     expect(hardening).toContain("UPDATE (attempts, status)");
+  });
+
+  it("adds a bounded, answer-free durable audit outbox with separated roles", () => {
+    expect(step5d).toContain("CREATE TABLE IF NOT EXISTS survey_audit_outbox");
+    expect(step5d).toContain(
+      "CREATE TABLE IF NOT EXISTS survey_screening_cleanup_runs",
+    );
+    expect(step5d).toContain("p117_audit_dispatcher");
+    expect(step5d).toContain("p117_screening_cleanup");
+    expect(step5d).toContain("dead_letter");
+    expect(step5d.toLowerCase()).not.toContain("answer_payload");
+    expect(step5d.toLowerCase()).not.toContain("withdrawal_secret");
+    expect(step5d.toLowerCase()).not.toContain("drop table");
+    expect(step5d.toLowerCase()).not.toContain("truncate table");
   });
 });

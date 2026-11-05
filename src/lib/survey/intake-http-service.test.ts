@@ -28,6 +28,7 @@ function submission(segment = "54", locale = "en") {
     locale,
     idempotencyKey: `synthetic-request-${segment}-${locale}-0001`,
     privacyScopeToken: `synthetic-scope-${segment}-${locale}-0001`,
+    withdrawalSecret: Buffer.alloc(32, 46).toString("base64url"),
     minimumAgeConfirmed: true,
     consent: {
       civicParticipation: true,
@@ -70,7 +71,7 @@ function request(body = JSON.stringify(submission())): IntakeTransportRequest {
   };
 }
 
-function harness() {
+function harness(options: { rateLimit?: number; auditThrows?: boolean } = {}) {
   const repository = new InMemorySecureIntakeRepository();
   const keyProvider = new InMemoryKeyProvider();
   keyProvider.addKey("answer", 1, Buffer.alloc(32, 42));
@@ -82,7 +83,10 @@ function harness() {
   let sequence = 0;
   const handler = createIntakeHttpHandler({
     expectedOrigin: origin,
-    audit: (event) => audit.push(event),
+    audit: (event) => {
+      audit.push(event);
+      if (options.auditThrows) throw new Error("synthetic audit sink failed");
+    },
     submit: (body, intakeRequest) =>
       submitSyntheticIntake(body, intakeRequest, {
         syntheticTestMode: true,
@@ -94,7 +98,7 @@ function harness() {
         keyProvider,
         screeningKeyRing,
         repository,
-        rateLimit: 100,
+        rateLimit: options.rateLimit ?? 100,
         createResponseId: () =>
           `00000000-0000-4000-8000-${String(++sequence).padStart(12, "0")}`,
       }),
@@ -117,30 +121,113 @@ describe("Step 5C intake HTTP boundary", () => {
     }
   });
 
+  it("classifies accepted, duplicate, replay and rate-limited outcomes exactly", async () => {
+    const acceptedHarness = harness();
+    const acceptedBody = JSON.stringify(submission());
+    expect((await acceptedHarness.handler(request(acceptedBody))).status).toBe(
+      201,
+    );
+    expect(acceptedHarness.audit.at(-1)?.classification).toBe(
+      "response_accepted_and_stored",
+    );
+
+    const replay = await acceptedHarness.handler(request(acceptedBody));
+    expect(replay.status).toBe(200);
+    expect(JSON.parse(replay.body)).toMatchObject({
+      status: "replay",
+      receiptRecoveryVerified: true,
+    });
+    expect(acceptedHarness.audit.at(-1)?.classification).toBe(
+      "idempotent_replay",
+    );
+
+    const duplicateInput = submission();
+    duplicateInput.idempotencyKey = "synthetic-request-duplicate-0001";
+    duplicateInput.privacyScopeToken = "synthetic-scope-duplicate-0001";
+    duplicateInput.withdrawalSecret = Buffer.alloc(32, 47).toString(
+      "base64url",
+    );
+    const duplicate = await acceptedHarness.handler(
+      request(JSON.stringify(duplicateInput)),
+    );
+    expect(duplicate.status).toBe(202);
+    expect(acceptedHarness.audit.at(-1)?.classification).toBe(
+      "response_retained_for_duplicate_review",
+    );
+
+    const limitedHarness = harness({ rateLimit: 1 });
+    await limitedHarness.handler(request(acceptedBody));
+    const limitedInput = submission();
+    limitedInput.idempotencyKey = "synthetic-request-limited-0001";
+    limitedInput.withdrawalSecret = Buffer.alloc(32, 48).toString("base64url");
+    const limited = await limitedHarness.handler(
+      request(JSON.stringify(limitedInput)),
+    );
+    expect(limited.status).toBe(429);
+    expect(limitedHarness.audit.at(-1)?.classification).toBe(
+      "rate_limited_request",
+    );
+  });
+
   it("rejects insecure transport, cross-origin, forged CSRF and oversized input", async () => {
-    const { handler } = harness();
+    const { handler, audit } = harness();
     await expect(
       handler({ ...request(), protocol: "http:" }),
     ).resolves.toMatchObject({
       status: 400,
     });
+    expect(audit.at(-1)?.classification).toBe(
+      "unauthorized_or_untrusted_request",
+    );
     await expect(
       handler({ ...request(), origin: "https://attacker.example" }),
     ).resolves.toMatchObject({ status: 403 });
+    expect(audit.at(-1)?.classification).toBe(
+      "unauthorized_or_untrusted_request",
+    );
     await expect(
       handler({
         ...request(),
         csrfCookieToken: "forged-token-000000000000000000000000",
       }),
     ).resolves.toMatchObject({ status: 403 });
+    expect(audit.at(-1)?.classification).toBe(
+      "unauthorized_or_untrusted_request",
+    );
     const oversized = "x".repeat(32 * 1024 + 1);
     await expect(handler(request(oversized))).resolves.toMatchObject({
       status: 413,
     });
+    expect(audit.at(-1)?.classification).toBe("invalid_request");
+  });
+
+  it("classifies method, content-type and service failures without leaking errors", async () => {
+    const { handler, audit } = harness();
+    await expect(
+      handler({ ...request(), method: "GET" }),
+    ).resolves.toMatchObject({ status: 405 });
+    expect(audit.at(-1)?.classification).toBe("invalid_request");
+    await expect(
+      handler({ ...request(), contentType: "text/plain" }),
+    ).resolves.toMatchObject({ status: 415 });
+    expect(audit.at(-1)?.classification).toBe("invalid_request");
+
+    const serviceAudit: SafeTransportAuditEvent[] = [];
+    const failing = createIntakeHttpHandler({
+      expectedOrigin: origin,
+      audit: (event) => serviceAudit.push(event),
+      submit: async () => {
+        throw new Error("confidential provider detail");
+      },
+    });
+    const failed = await failing(request());
+    expect(failed).toMatchObject({ status: 503 });
+    expect(failed.body).not.toContain("provider detail");
+    expect(serviceAudit.at(-1)?.classification).toBe("service_failure");
   });
 
   it("allows only the exact credentialed CORS preflight", async () => {
-    const { handler } = harness();
+    const { handler, audit } = harness();
     const valid = await handler({
       ...request(""),
       method: "OPTIONS",
@@ -153,6 +240,7 @@ describe("Step 5C intake HTTP boundary", () => {
     });
     expect(valid).toMatchObject({ status: 204, body: "" });
     expect(valid.headers["access-control-allow-origin"]).toBe(origin);
+    expect(audit.at(-1)?.classification).toBe("preflight_allowed");
     await expect(
       handler({
         ...request(""),
@@ -173,10 +261,19 @@ describe("Step 5C intake HTTP boundary", () => {
     expect(result.status).toBe(400);
     expect(JSON.stringify(audit)).not.toContain("healthcare_access");
     expect(JSON.stringify(audit)).not.toContain("script");
+    expect(audit.at(-1)?.classification).toBe("invalid_request");
+  });
+
+  it("does not let a best-effort audit failure alter a committed response", async () => {
+    const { handler, repository } = harness({ auditThrows: true });
+    const result = await handler(request());
+    expect(result.status).toBe(201);
+    expect(repository.snapshot().records).toBe(1);
   });
 
   it("keeps the production gate closed before consulting submission storage", async () => {
     let submitted = false;
+    const audit: SafeTransportAuditEvent[] = [];
     const handler = createProductionIntakeGate({
       expectedOrigin: origin,
       deploymentCommitSha: "a".repeat(40),
@@ -186,11 +283,12 @@ describe("Step 5C intake HTTP boundary", () => {
         submitted = true;
         throw new Error("must not run");
       },
-      audit: () => undefined,
+      audit: (event) => audit.push(event),
     });
     const result = await handler(request());
     expect(result.status).toBe(503);
     expect(submitted).toBe(false);
+    expect(audit.at(-1)?.classification).toBe("collection_disabled");
   });
 
   it("still rejects when booleans are true but signed approval evidence is absent", async () => {

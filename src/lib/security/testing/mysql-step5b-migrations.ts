@@ -25,6 +25,14 @@ export const step5BMigrations = [
   },
 ] as const;
 
+export const step5DMigrations = [
+  ...step5BMigrations,
+  {
+    version: "0004_step_5d_audit_outbox",
+    path: resolve("database/migrations/mysql/0004_step_5d_audit_outbox.sql"),
+  },
+] as const;
+
 export type MigrationResult = {
   version: string;
   checksumSha256: string;
@@ -120,6 +128,22 @@ export async function applyStep5BMigrations(
 ): Promise<readonly MigrationResult[]> {
   const results: MigrationResult[] = [];
   for (const migration of step5BMigrations) {
+    results.push(
+      await applyTrackedSql(connection, {
+        database: STEP5B_DATABASE,
+        version: migration.version,
+        sql: readFileSync(migration.path, "utf8"),
+      }),
+    );
+  }
+  return results;
+}
+
+export async function applyStep5DMigrations(
+  connection: Connection,
+): Promise<readonly MigrationResult[]> {
+  const results: MigrationResult[] = [];
+  for (const migration of step5DMigrations) {
     results.push(
       await applyTrackedSql(connection, {
         database: STEP5B_DATABASE,

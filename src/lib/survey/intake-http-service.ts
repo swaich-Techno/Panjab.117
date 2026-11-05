@@ -36,21 +36,16 @@ export type SafeTransportAuditEvent = {
   event: "survey_intake_request";
   correlationId: string;
   occurredAt: string;
-  outcome: "accepted" | "rejected";
-  reason:
-    | "accepted"
-    | "preflight"
-    | "method"
-    | "transport"
-    | "origin"
-    | "content_type"
-    | "body_size"
-    | "csrf"
-    | "collection_disabled"
-    | "age_policy_unapproved"
-    | "request_not_trusted"
+  classification:
+    | "response_accepted_and_stored"
+    | "response_retained_for_duplicate_review"
+    | "idempotent_replay"
+    | "rate_limited_request"
     | "invalid_request"
-    | "service_unavailable";
+    | "unauthorized_or_untrusted_request"
+    | "service_failure"
+    | "collection_disabled"
+    | "preflight_allowed";
 };
 
 type SubmitPort = (
@@ -144,12 +139,14 @@ export function createIntakeHttpHandler(input: {
   expectedOrigin: string;
   submit: SubmitPort;
   audit: (event: SafeTransportAuditEvent) => void;
+  onAuditFailure?: (event: SafeTransportAuditEvent) => void;
 }) {
   assertExpectedOrigin(input.expectedOrigin);
   return async function handle(
     request: IntakeTransportRequest,
   ): Promise<IntakeTransportResponse> {
-    let reason: SafeTransportAuditEvent["reason"] = "invalid_request";
+    let classification: SafeTransportAuditEvent["classification"] =
+      "invalid_request";
     const receivedAtValid = Number.isFinite(request.receivedAt.getTime());
     const safeCorrelationId = /^[A-Za-z0-9_-]{8,128}$/u.test(
       request.correlationId,
@@ -181,7 +178,7 @@ export function createIntakeHttpHandler(input: {
           requestedHeaders.size === 0 ||
           [...requestedHeaders].some((header) => !allowedHeaders.has(header))
         ) {
-          reason = "origin";
+          classification = "unauthorized_or_untrusted_request";
           return response(
             403,
             { error: "The request could not be accepted." },
@@ -189,7 +186,7 @@ export function createIntakeHttpHandler(input: {
             request.origin,
           );
         }
-        reason = "preflight";
+        classification = "preflight_allowed";
         return {
           status: 204,
           headers: {
@@ -205,7 +202,7 @@ export function createIntakeHttpHandler(input: {
         };
       }
       if (request.method !== "POST") {
-        reason = "method";
+        classification = "invalid_request";
         return {
           ...response(
             405,
@@ -217,7 +214,7 @@ export function createIntakeHttpHandler(input: {
         };
       }
       if (request.protocol !== "https:") {
-        reason = "transport";
+        classification = "unauthorized_or_untrusted_request";
         return response(
           400,
           { error: "The request could not be accepted." },
@@ -226,7 +223,7 @@ export function createIntakeHttpHandler(input: {
         );
       }
       if (!receivedAtValid) {
-        reason = "invalid_request";
+        classification = "invalid_request";
         return response(
           400,
           { error: "The request could not be accepted." },
@@ -238,7 +235,7 @@ export function createIntakeHttpHandler(input: {
         request.origin !== input.expectedOrigin ||
         !["same-origin", "same-site"].includes(request.secFetchSite ?? "")
       ) {
-        reason = "origin";
+        classification = "unauthorized_or_untrusted_request";
         return response(
           403,
           { error: "The request could not be accepted." },
@@ -251,7 +248,7 @@ export function createIntakeHttpHandler(input: {
         request.contentType.split(";", 1)[0]?.trim().toLowerCase() !==
           "application/json"
       ) {
-        reason = "content_type";
+        classification = "invalid_request";
         return response(
           415,
           { error: "The request could not be accepted." },
@@ -266,7 +263,7 @@ export function createIntakeHttpHandler(input: {
             declaredLength > MAX_INTAKE_BODY_BYTES)) ||
         Buffer.byteLength(request.body, "utf8") > MAX_INTAKE_BODY_BYTES
       ) {
-        reason = "body_size";
+        classification = "invalid_request";
         return response(
           413,
           { error: "The request could not be accepted." },
@@ -276,7 +273,7 @@ export function createIntakeHttpHandler(input: {
       }
       const proof = csrfProof(request);
       if (!proof) {
-        reason = "csrf";
+        classification = "unauthorized_or_untrusted_request";
         return response(
           403,
           { error: "The request could not be accepted." },
@@ -290,7 +287,14 @@ export function createIntakeHttpHandler(input: {
         csrfProof: proof,
         now: request.receivedAt,
       });
-      reason = "accepted";
+      classification =
+        receipt.status === "accepted"
+          ? "response_accepted_and_stored"
+          : receipt.status === "duplicate"
+            ? "response_retained_for_duplicate_review"
+            : receipt.status === "replay"
+              ? "idempotent_replay"
+              : "rate_limited_request";
       const status =
         receipt.status === "accepted"
           ? 201
@@ -298,14 +302,24 @@ export function createIntakeHttpHandler(input: {
             ? 202
             : receipt.status === "rate_limited"
               ? 429
-              : 409;
+              : receipt.receiptRecoveryVerified
+                ? 200
+                : 409;
       return response(status, receipt, input.expectedOrigin, request.origin);
     } catch (error) {
       const safe =
         error instanceof SafeIntakeError
           ? error
           : new SafeIntakeError("service_unavailable");
-      reason = safe.code;
+      classification =
+        safe.code === "collection_disabled" ||
+        safe.code === "age_policy_unapproved"
+          ? "collection_disabled"
+          : safe.code === "request_not_trusted"
+            ? "unauthorized_or_untrusted_request"
+            : safe.code === "invalid_request"
+              ? "invalid_request"
+              : "service_failure";
       return response(
         publicErrorStatus(safe.code),
         { error: safe.publicMessage },
@@ -313,18 +327,24 @@ export function createIntakeHttpHandler(input: {
         request.origin,
       );
     } finally {
-      input.audit({
+      const event: SafeTransportAuditEvent = {
         event: "survey_intake_request",
         correlationId: safeCorrelationId,
         occurredAt: receivedAtValid
           ? request.receivedAt.toISOString()
           : "invalid-time",
-        outcome:
-          reason === "accepted" || reason === "preflight"
-            ? "accepted"
-            : "rejected",
-        reason,
-      });
+        classification,
+      };
+      try {
+        input.audit(event);
+      } catch {
+        try {
+          input.onAuditFailure?.(event);
+        } catch {
+          // A best-effort edge-audit failure must never alter an HTTP result.
+          // Accepted responses rely on the transactional database outbox.
+        }
+      }
     }
   };
 }
@@ -336,6 +356,7 @@ export function createProductionIntakeGate(input: {
   evidenceProvider: ProductionLaunchEvidenceProvider;
   submitApproved: SubmitPort;
   audit: (event: SafeTransportAuditEvent) => void;
+  onAuditFailure?: (event: SafeTransportAuditEvent) => void;
   controls?: {
     liveSurveyCollectionEnabled: boolean;
     launchApproved: boolean;
@@ -346,6 +367,7 @@ export function createProductionIntakeGate(input: {
   return createIntakeHttpHandler({
     expectedOrigin: input.expectedOrigin,
     audit: input.audit,
+    onAuditFailure: input.onAuditFailure,
     submit: async (body, request) => {
       if (
         !controls.liveSurveyCollectionEnabled ||

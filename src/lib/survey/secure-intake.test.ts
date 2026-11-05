@@ -30,6 +30,7 @@ function submission(overrides: Record<string, unknown> = {}) {
     locale: "en",
     idempotencyKey: "synthetic-request-0001",
     privacyScopeToken: "synthetic-scope-0001",
+    withdrawalSecret: Buffer.alloc(32, 6).toString("base64url"),
     minimumAgeConfirmed: true,
     consent: {
       civicParticipation: true,
@@ -188,6 +189,36 @@ describe("Step 5A secure synthetic intake", () => {
     expect(receipts.filter(({ status }) => status === "replay")).toHaveLength(
       11,
     );
+    expect(deps.repository.snapshot().records).toBe(1);
+  });
+
+  it("recovers a lost receipt only when the retry proves the original secret", async () => {
+    const deps = dependencies();
+    const raw = JSON.stringify(submission());
+    const accepted = await submitSyntheticIntake(raw, request(), deps);
+
+    const recovered = await submitSyntheticIntake(raw, request(), deps);
+    expect(recovered).toMatchObject({
+      status: "replay",
+      responseId: accepted.responseId,
+      withdrawalCode: submission().withdrawalSecret,
+      receiptRecoveryVerified: true,
+    });
+
+    const hostileRetry = submission({
+      withdrawalSecret: Buffer.alloc(32, 99).toString("base64url"),
+    });
+    const rejectedRecovery = await submitSyntheticIntake(
+      JSON.stringify(hostileRetry),
+      request(),
+      deps,
+    );
+    expect(rejectedRecovery).toMatchObject({
+      status: "replay",
+      responseId: null,
+      withdrawalCode: null,
+      receiptRecoveryVerified: false,
+    });
     expect(deps.repository.snapshot().records).toBe(1);
   });
 

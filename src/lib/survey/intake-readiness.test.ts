@@ -31,6 +31,7 @@ function fixture(overrides: Record<string, unknown> = {}) {
     locale: "en",
     idempotencyKey: "synthetic-request-0001",
     privacyScopeToken: "synthetic-scope-0001",
+    withdrawalSecret: Buffer.alloc(32, 3).toString("base64url"),
     minimumAgeConfirmed: true,
     consent: {
       civicParticipation: true,

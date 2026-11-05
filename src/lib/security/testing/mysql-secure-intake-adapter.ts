@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 
 import type {
   Pool,
@@ -18,6 +18,7 @@ import type {
 } from "@/lib/survey/intake-readiness";
 import type {
   SecureIntakeRepository,
+  SecureIntakeCommitResult,
   SecureSurveyRecord,
 } from "@/lib/survey/secure-intake";
 import {
@@ -44,6 +45,8 @@ export type MysqlAdapterHooks = {
   afterCommit?: (record: SecureSurveyRecord) => Promise<void> | void;
   onRetry?: (attempt: number, errorCode: string) => void;
   retentionPolicy?: ScreeningRetentionPolicy;
+  durableAuditOutbox?: boolean;
+  createOutboxEventId?: () => string;
 };
 
 export class CollectionApprovalError extends Error {
@@ -98,13 +101,40 @@ function submittedDate(record: SecureSurveyRecord): Date {
   return result;
 }
 
-function outcome(status: AtomicIntakeOutcome["status"]): AtomicIntakeOutcome {
+function outcome(
+  status: AtomicIntakeOutcome["status"],
+  responseId: string | null = null,
+  receiptRecoveryVerified = false,
+): SecureIntakeCommitResult {
   return {
     status,
     storedForHumanReview: status === "accepted" || status === "duplicate",
     acceptedForAnalysis: status === "accepted",
     automaticallyDeleted: false,
+    responseId,
+    receiptRecoveryVerified,
   };
+}
+
+async function receiptRecoveryMatches(
+  connection: PoolConnection,
+  responseId: Buffer,
+  candidateDigest: string,
+): Promise<boolean> {
+  const [rows] = await connection.execute<RowDataPacket[]>(
+    `SELECT receipt_digest
+     FROM ${STEP5B_DATABASE}.survey_withdrawal_receipts
+     WHERE response_id = ?
+     LIMIT 1 FOR UPDATE`,
+    [responseId],
+  );
+  const expected = rows[0]?.receipt_digest as Buffer | undefined;
+  const supplied = digestToBuffer(candidateDigest);
+  return Boolean(
+    expected &&
+    expected.length === supplied.length &&
+    timingSafeEqual(expected, supplied),
+  );
 }
 
 function errorCode(error: unknown): string {
@@ -285,6 +315,36 @@ async function insertEncryptedPartition(
   );
 }
 
+async function insertIntakeOutbox(
+  connection: PoolConnection,
+  record: SecureSurveyRecord,
+  outcomeStatus: "accepted" | "duplicate",
+  eventId: string,
+): Promise<void> {
+  const outcome =
+    outcomeStatus === "accepted"
+      ? "response_accepted_and_stored"
+      : "response_retained_for_duplicate_review";
+  const dedupeKey = createHash("sha256")
+    .update(`intake_committed\0${record.responseId}`, "utf8")
+    .digest();
+  const submittedAt = submittedDate(record);
+  await connection.execute(
+    `INSERT INTO ${STEP5B_DATABASE}.survey_audit_outbox
+      (event_id, response_id, event_type, outcome, dedupe_key, max_attempts,
+       available_at, created_at)
+     VALUES (?, ?, 'intake_committed', ?, ?, 5, ?, ?)`,
+    [
+      uuidToBuffer(eventId),
+      uuidToBuffer(record.responseId),
+      outcome,
+      dedupeKey,
+      submittedAt,
+      submittedAt,
+    ],
+  );
+}
+
 export class MysqlSecureIntakeTestAdapter implements SecureIntakeRepository {
   constructor(
     private readonly pool: Pool,
@@ -295,7 +355,7 @@ export class MysqlSecureIntakeTestAdapter implements SecureIntakeRepository {
   async commit(
     record: SecureSurveyRecord,
     claim: AtomicIntakeClaim,
-  ): Promise<AtomicIntakeOutcome> {
+  ): Promise<SecureIntakeCommitResult> {
     if (record.responseId !== claim.responseId) {
       throw new Error("Claim ownership mismatch");
     }
@@ -338,9 +398,18 @@ export class MysqlSecureIntakeTestAdapter implements SecureIntakeRepository {
           idempotencyWindow,
         );
         if (replayResponse) {
+          const recoveryVerified = await receiptRecoveryMatches(
+            connection,
+            replayResponse,
+            record.withdrawalCode.digest,
+          );
           await connection.commit();
           committed = true;
-          return outcome("replay");
+          return outcome(
+            "replay",
+            recoveryVerified ? bufferToUuid(replayResponse) : null,
+            recoveryVerified,
+          );
         }
         const duplicateWindow = screeningRetentionWindow(
           retentionPolicy,
@@ -423,11 +492,24 @@ export class MysqlSecureIntakeTestAdapter implements SecureIntakeRepository {
           }
         }
 
+        if (this.hooks.durableAuditOutbox === true) {
+          await insertIntakeOutbox(
+            connection,
+            record,
+            isDuplicate ? "duplicate" : "accepted",
+            this.hooks.createOutboxEventId?.() ?? randomUUID(),
+          );
+        }
+
         await this.hooks.beforeCommit?.(connection, record);
         await connection.commit();
         committed = true;
         await this.hooks.afterCommit?.(record);
-        return outcome(isDuplicate ? "duplicate" : "accepted");
+        return outcome(
+          isDuplicate ? "duplicate" : "accepted",
+          record.responseId,
+          true,
+        );
       } catch (error) {
         if (!committed) await rollbackQuietly(connection);
         if (

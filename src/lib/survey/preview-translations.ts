@@ -36,6 +36,8 @@ export type SurveyPreviewCopy = {
   responseReference: string;
   withdrawalReceipt: string;
   receiptWarning: string;
+  retrySafety: string;
+  withdrawalInstructions: string;
   questionnaireVersion: string;
   consentVersion: string;
 };
@@ -84,6 +86,10 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     withdrawalReceipt: "One-time withdrawal receipt",
     receiptWarning:
       "Save this receipt now. It is shown once and is not stored in your browser.",
+    retrySafety:
+      "If confirmation is lost, retry in this tab. Refreshing or closing the tab erases the anonymous recovery material and may make the receipt unrecoverable.",
+    withdrawalInstructions:
+      "Keep this receipt private. A future approved withdrawal service would require it; a response reference alone is not enough.",
     questionnaireVersion: "Questionnaire",
     consentVersion: "Consent",
   },
@@ -129,6 +135,10 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     withdrawalReceipt: "ਇੱਕ-ਵਾਰ ਵਰਤੋਂ ਵਾਲੀ ਵਾਪਸੀ ਰਸੀਦ",
     receiptWarning:
       "ਇਹ ਰਸੀਦ ਹੁਣੇ ਸੰਭਾਲੋ। ਇਹ ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਦਿਖਾਈ ਜਾਂਦੀ ਹੈ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਨਹੀਂ ਸੰਭਾਲੀ ਜਾਂਦੀ।",
+    retrySafety:
+      "ਜੇ ਪੁਸ਼ਟੀ ਨਾ ਮਿਲੇ ਤਾਂ ਇਸੇ ਟੈਬ ਵਿੱਚ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ। ਟੈਬ ਨੂੰ ਰੀਫ੍ਰੈਸ਼ ਜਾਂ ਬੰਦ ਕਰਨ ਨਾਲ ਗੁਮਨਾਮੀ ਵਾਪਸੀ ਸਮੱਗਰੀ ਮਿਟ ਜਾਵੇਗੀ ਅਤੇ ਰਸੀਦ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨੀ ਅਸੰਭਵ ਹੋ ਸਕਦੀ ਹੈ।",
+    withdrawalInstructions:
+      "ਇਹ ਰਸੀਦ ਨਿੱਜੀ ਰੱਖੋ। ਭਵਿੱਖ ਦੀ ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਵਾਪਸੀ ਸੇਵਾ ਲਈ ਇਹ ਲਾਜ਼ਮੀ ਹੋਵੇਗੀ; ਕੇਵਲ ਜਵਾਬ ਹਵਾਲਾ ਕਾਫ਼ੀ ਨਹੀਂ ਹੈ।",
     questionnaireVersion: "ਪ੍ਰਸ਼ਨਾਵਲੀ",
     consentVersion: "ਸਹਿਮਤੀ",
   },
@@ -176,6 +186,10 @@ export const surveyPreviewCopy: Record<Locale, SurveyPreviewCopy> = {
     withdrawalReceipt: "एक बार उपयोग होने वाली वापसी रसीद",
     receiptWarning:
       "यह रसीद अभी सुरक्षित रखें। इसे केवल एक बार दिखाया जाता है और ब्राउज़र में सहेजा नहीं जाता।",
+    retrySafety:
+      "यदि पुष्टि खो जाए तो इसी टैब में दोबारा प्रयास करें। टैब रीफ़्रेश या बंद करने पर गुमनाम पुनर्प्राप्ति सामग्री मिट जाएगी और रसीद वापस पाना असंभव हो सकता है।",
+    withdrawalInstructions:
+      "इस रसीद को निजी रखें। भविष्य की स्वीकृत वापसी सेवा के लिए इसकी आवश्यकता होगी; केवल उत्तर संदर्भ पर्याप्त नहीं है।",
     questionnaireVersion: "प्रश्नावली",
     consentVersion: "सहमति",
   },

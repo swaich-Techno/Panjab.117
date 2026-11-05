@@ -30,6 +30,7 @@ async function storedFixture() {
       locale: "pa",
       idempotencyKey: "synthetic-request-0001",
       privacyScopeToken: "synthetic-scope-0001",
+      withdrawalSecret: Buffer.alloc(32, 36).toString("base64url"),
       minimumAgeConfirmed: true,
       consent: {
         civicParticipation: true,

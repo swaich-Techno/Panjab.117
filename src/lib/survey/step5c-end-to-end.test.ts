@@ -34,6 +34,7 @@ describe("Step 5C synthetic end-to-end journey", () => {
       locale: "pa",
       idempotencyKey: "synthetic-e2e-request-0001",
       privacyScopeToken: "synthetic-e2e-scope-0001",
+      withdrawalSecret: Buffer.alloc(32, 57).toString("base64url"),
       minimumAgeConfirmed: true,
       consent: {
         civicParticipation: true,

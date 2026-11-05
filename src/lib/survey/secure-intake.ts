@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, timingSafeEqual } from "node:crypto";
 
 import {
   assertAuthorized,
@@ -101,8 +101,13 @@ export interface SecureIntakeRepository {
   commit(
     record: SecureSurveyRecord,
     claim: AtomicIntakeClaim,
-  ): Promise<AtomicIntakeOutcome>;
+  ): Promise<SecureIntakeCommitResult>;
 }
+
+export type SecureIntakeCommitResult = AtomicIntakeOutcome & {
+  responseId: string | null;
+  receiptRecoveryVerified: boolean;
+};
 
 export type SecureIntakeReceipt = {
   status: AtomicIntakeOutcome["status"];
@@ -111,11 +116,12 @@ export type SecureIntakeReceipt = {
   storedForHumanReview: boolean;
   acceptedForAnalysis: boolean;
   automaticallyDeleted: false;
+  receiptRecoveryVerified: boolean;
 };
 
 type StoreState = {
   records: Map<string, SecureSurveyRecord>;
-  idempotencySignals: Set<string>;
+  idempotencySignals: Map<string, string>;
   payloadSignals: Set<string>;
   rateCounts: Map<string, number>;
 };
@@ -123,7 +129,7 @@ type StoreState = {
 function cloneState(state: StoreState): StoreState {
   return {
     records: new Map(state.records),
-    idempotencySignals: new Set(state.idempotencySignals),
+    idempotencySignals: new Map(state.idempotencySignals),
     payloadSignals: new Set(state.payloadSignals),
     rateCounts: new Map(state.rateCounts),
   };
@@ -132,7 +138,7 @@ function cloneState(state: StoreState): StoreState {
 export class InMemorySecureIntakeRepository implements SecureIntakeRepository {
   #state: StoreState = {
     records: new Map(),
-    idempotencySignals: new Set(),
+    idempotencySignals: new Map(),
     payloadSignals: new Set(),
     rateCounts: new Map(),
   };
@@ -147,7 +153,7 @@ export class InMemorySecureIntakeRepository implements SecureIntakeRepository {
   async commit(
     record: SecureSurveyRecord,
     claim: AtomicIntakeClaim,
-  ): Promise<AtomicIntakeOutcome> {
+  ): Promise<SecureIntakeCommitResult> {
     if (claim.responseId !== record.responseId) {
       throw new Error("Claim ownership mismatch");
     }
@@ -167,6 +173,8 @@ export class InMemorySecureIntakeRepository implements SecureIntakeRepository {
         storedForHumanReview: false,
         acceptedForAnalysis: false,
         automaticallyDeleted: false,
+        responseId: null,
+        receiptRecoveryVerified: false,
       };
     }
 
@@ -175,17 +183,26 @@ export class InMemorySecureIntakeRepository implements SecureIntakeRepository {
       next.rateCounts.set(signal, currentRate + 1);
     }
 
-    if (
-      claim.idempotencySignals.some((signal) =>
-        this.#state.idempotencySignals.has(signal),
-      )
-    ) {
+    const replayResponseId = claim.idempotencySignals
+      .map((signal) => this.#state.idempotencySignals.get(signal))
+      .find((responseId) => responseId !== undefined);
+    if (replayResponseId) {
+      const existing = this.#state.records.get(replayResponseId);
+      const expected = existing
+        ? Buffer.from(existing.withdrawalCode.digest, "base64url")
+        : Buffer.alloc(0);
+      const supplied = Buffer.from(record.withdrawalCode.digest, "base64url");
+      const receiptRecoveryVerified =
+        expected.length === supplied.length &&
+        timingSafeEqual(expected, supplied);
       this.#state = next;
       return {
         status: "replay",
         storedForHumanReview: false,
         acceptedForAnalysis: false,
         automaticallyDeleted: false,
+        responseId: receiptRecoveryVerified ? replayResponseId : null,
+        receiptRecoveryVerified,
       };
     }
 
@@ -196,7 +213,7 @@ export class InMemorySecureIntakeRepository implements SecureIntakeRepository {
       ? { ...record, qualityStatus: "pending_duplicate_review" }
       : record;
     claim.idempotencySignals.forEach((signal) =>
-      next.idempotencySignals.add(signal),
+      next.idempotencySignals.set(signal, record.responseId),
     );
     if (!duplicate) {
       claim.payloadSignals.forEach((signal) => next.payloadSignals.add(signal));
@@ -211,7 +228,11 @@ export class InMemorySecureIntakeRepository implements SecureIntakeRepository {
     };
     this.beforeCommit?.(storedRecord, outcome);
     this.#state = next;
-    return outcome;
+    return {
+      ...outcome,
+      responseId: record.responseId,
+      receiptRecoveryVerified: true,
+    };
   }
 
   get(responseId: string): SecureSurveyRecord | undefined {
@@ -363,6 +384,7 @@ export async function submitSyntheticIntake(
       expiresAt: dependencies.withdrawalCodeExpiresAt,
     },
     dependencies.withdrawalHmacKey,
+    () => Buffer.from(submission.withdrawalSecret, "base64url"),
   );
   const record: SecureSurveyRecord = {
     responseId,
@@ -390,11 +412,13 @@ export async function submitSyntheticIntake(
 
   try {
     const outcome = await dependencies.repository.commit(record, claim);
-    const stored = outcome.storedForHumanReview;
+    const confirmed =
+      outcome.storedForHumanReview ||
+      (outcome.status === "replay" && outcome.receiptRecoveryVerified);
     return {
       ...outcome,
-      responseId: stored ? responseId : null,
-      withdrawalCode: stored ? withdrawal.participantCode : null,
+      responseId: confirmed ? outcome.responseId : null,
+      withdrawalCode: confirmed ? submission.withdrawalSecret : null,
     };
   } catch {
     throw new SafeIntakeError("service_unavailable");

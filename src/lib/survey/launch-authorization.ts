@@ -39,7 +39,7 @@ export type ApprovalEvidence = {
   signerSubject: string;
   approvedAt: string;
   expiresAt: string;
-  revokedAt: null;
+  revokedAt: string | null;
 };
 
 export type ProductionLaunchEvidence = {

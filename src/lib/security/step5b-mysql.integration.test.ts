@@ -27,7 +27,7 @@ import {
   bufferToUuid,
 } from "./testing/mysql-secure-intake-adapter";
 import {
-  applyStep5BMigrations,
+  applyStep5DMigrations,
   applyTrackedSql,
   createDisposableDatabase,
   dropDisposableDatabase,
@@ -37,6 +37,7 @@ import {
 
 const port = Number(process.env.PANJAB_MYSQL_PORT ?? 0);
 const binDirectory = process.env.PANJAB_MYSQL_BIN;
+const mysqlPassword = process.env.PANJAB_MYSQL_PASSWORD;
 const runIntegration =
   Number.isSafeInteger(port) &&
   port > 0 &&
@@ -105,6 +106,9 @@ function rawSubmission(
       input.idempotencyKey ?? `step5b-idempotency-${fixtureSequence}`,
     privacyScopeToken:
       input.privacyScopeToken ?? `step5b-privacy-scope-${fixtureSequence}`,
+    withdrawalSecret: Buffer.alloc(32, fixtureSequence % 255).toString(
+      "base64url",
+    ),
     minimumAgeConfirmed: true,
     consent: {
       civicParticipation: true,
@@ -175,6 +179,9 @@ function runMysqlClient(
       input,
       maxBuffer: 32 * 1024 * 1024,
       windowsHide: true,
+      env: mysqlPassword
+        ? { ...process.env, MYSQL_PWD: mysqlPassword }
+        : process.env,
     },
   );
   if (result.status !== 0) {
@@ -203,6 +210,7 @@ mysqlDescribe("Step 5B disposable MySQL 8.4 verification", () => {
       host: "127.0.0.1",
       port,
       user: "root",
+      password: mysqlPassword,
       multipleStatements: true,
       timezone: "Z",
     });
@@ -210,11 +218,12 @@ mysqlDescribe("Step 5B disposable MySQL 8.4 verification", () => {
     await dropDisposableDatabase(admin, "panjab117_partial");
     await dropDisposableDatabase(admin, "panjab117_restore");
     await createDisposableDatabase(admin);
-    migrationResults = await applyStep5BMigrations(admin);
+    migrationResults = await applyStep5DMigrations(admin);
     pool = mysql.createPool({
       host: "127.0.0.1",
       port,
       user: "root",
+      password: mysqlPassword,
       database: STEP5B_DATABASE,
       connectionLimit: 20,
       timezone: "Z",
@@ -280,8 +289,9 @@ mysqlDescribe("Step 5B disposable MySQL 8.4 verification", () => {
       logOutput: "FILE",
       binaryLog: 1,
     });
-    expect(migrationResults).toHaveLength(3);
+    expect(migrationResults).toHaveLength(4);
     expect(migrationResults.map(({ outcome }) => outcome)).toEqual([
+      "applied",
       "applied",
       "applied",
       "applied",
@@ -295,6 +305,7 @@ mysqlDescribe("Step 5B disposable MySQL 8.4 verification", () => {
     expect(tableRows.map(({ TABLE_NAME }) => TABLE_NAME)).toEqual([
       "schema_migrations",
       "survey_access_audit",
+      "survey_audit_outbox",
       "survey_civic_payloads",
       "survey_collection_approvals",
       "survey_consent_notice_versions",
@@ -304,6 +315,7 @@ mysqlDescribe("Step 5B disposable MySQL 8.4 verification", () => {
       "survey_questionnaire_versions",
       "survey_responses",
       "survey_screening_claims",
+      "survey_screening_cleanup_runs",
       "survey_withdrawal_receipts",
     ]);
     const [foreignKeys] = await admin.execute<RowDataPacket[]>(
@@ -364,8 +376,9 @@ mysqlDescribe("Step 5B disposable MySQL 8.4 verification", () => {
   });
 
   it("skips exact repeats and rejects a changed checksum", async () => {
-    const repeat = await applyStep5BMigrations(admin);
+    const repeat = await applyStep5DMigrations(admin);
     expect(repeat.map(({ outcome }) => outcome)).toEqual([
+      "already_applied",
       "already_applied",
       "already_applied",
       "already_applied",
@@ -421,7 +434,10 @@ mysqlDescribe("Step 5B disposable MySQL 8.4 verification", () => {
   });
 
   it("atomically writes metadata, both ciphertext partitions, consent and screening claims", async () => {
-    const adapter = new MysqlSecureIntakeTestAdapter(pool);
+    const adapter = new MysqlSecureIntakeTestAdapter(pool, {
+      durableAuditOutbox: true,
+      createOutboxEventId: () => "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    });
     const receipt = await submit(adapter, rawSubmission());
     expect(receipt.status).toBe("accepted");
     const responseId = binaryUuid(receipt.responseId!);
@@ -448,6 +464,19 @@ mysqlDescribe("Step 5B disposable MySQL 8.4 verification", () => {
     );
     expect(String(payloadRows[0]!.payload)).not.toContain("healthcare_access");
     expect(String(payloadRows[0]!.payload)).not.toContain("good");
+    const [outboxRows] = await pool.execute<RowDataPacket[]>(
+      `SELECT event_type, outcome, state, attempt_count
+       FROM survey_audit_outbox WHERE response_id = ?`,
+      [responseId],
+    );
+    expect(outboxRows).toEqual([
+      expect.objectContaining({
+        event_type: "intake_committed",
+        outcome: "response_accepted_and_stored",
+        state: "pending",
+        attempt_count: 0,
+      }),
+    ]);
   });
 
   it("fails closed for unapproved registries and unknown approval IDs", async () => {
