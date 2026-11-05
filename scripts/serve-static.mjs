@@ -78,7 +78,7 @@ const server = createServer(async (request, response) => {
   try {
     const url = new URL(request.url ?? "/", `http://${request.headers.host}`);
     if (url.pathname === "/") {
-      response.writeHead(302, { Location: "/pa/" });
+      response.writeHead(302, { Location: "/en/" });
       response.end();
       return;
     }

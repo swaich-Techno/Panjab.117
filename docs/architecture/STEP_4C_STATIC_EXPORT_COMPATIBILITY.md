@@ -21,7 +21,7 @@ supports Next.js static HTML exports with an `out` build directory.
 
 | Existing behavior                          | Static-export issue                             | Step 4C adaptation                                                          | Essential behavior retained |
 | ------------------------------------------ | ----------------------------------------------- | --------------------------------------------------------------------------- | --------------------------- |
-| `src/proxy.ts` redirects `/` to a locale   | Proxy is not supported                          | `public/_redirects` issues `/` to Punjabi at `/pa/` with HTTP 302           | yes                         |
+| `src/proxy.ts` redirects `/` to a locale   | Proxy is not supported                          | `public/_redirects` issues `/` to English at `/en/` with HTTP 302           | yes                         |
 | region page reads request `searchParams`   | arbitrary request queries need a runtime        | small client component filters already-public records in memory             | yes                         |
 | survey page declares `force-dynamic`       | dynamic rendering cannot be exported            | remove the declaration and evaluate the disabled schedule deterministically | yes                         |
 | `next.config.ts` supplies response headers | runtime headers are unsupported                 | `public/_headers` applies the same policy to static assets                  | yes                         |
@@ -37,7 +37,7 @@ evidence rather than hidden.
 - 117 unique Assembly constituency records across Majha, Malwa, Doaba and
   Puadh;
 - Fatehgarh Sahib Assembly segments 54, 55, 56, 57, 58, 59, 67, 69 and 106;
-- Punjabi, Hindi and English routes and language alternates;
+- English, Punjabi and Hindi routes and language alternates;
 - the interactive survey preview, which keeps answers only in React memory;
 - disabled search indexing at metadata, `robots.txt` and HTTP-header layers;
 - launch approval plus production-security, privacy, consent,

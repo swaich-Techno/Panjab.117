@@ -2,7 +2,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
 const outputRoot = path.resolve("out");
-const locales = ["pa", "hi", "en"];
+const locales = ["en", "pa", "hi"];
 const regions = ["majha", "malwa", "doaba", "puadh"];
 const routes = locales.flatMap((locale) => [
   `/${locale}`,
@@ -134,7 +134,7 @@ assert(
 
 const redirects = await readFile(path.join(outputRoot, "_redirects"), "utf8");
 assert(
-  redirects.includes("/ /pa/ 302"),
+  redirects.includes("/ /en/ 302"),
   "Root redirect is missing or not temporary",
 );
 

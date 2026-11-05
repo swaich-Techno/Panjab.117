@@ -13,23 +13,7 @@ Final artwork must use the separately supplied, approved Panjab 117 logo. No log
 
 ## Required cover headline
 
-### ਪੰਜਾਬੀ — primary
-
-**ਪੰਜਾਬ 117<br>
-ਫ਼ਤਿਹਗੜ੍ਹ ਸਾਹਿਬ ਲੋਕ ਸਭਾ ਹਲਕਾ<br>
-ਨੌਂ ਵਿਧਾਨ ਸਭਾ ਹਲਕੇ<br>
-ਸੁਤੰਤਰ ਨਾਗਰਿਕ ਖੋਜ<br>
-ਵੈੱਬਸਾਈਟ ਝਲਕ ਉਪਲਬਧ**
-
-### हिन्दी — secondary
-
-**पंजाब 117<br>
-फ़तेहगढ़ साहिब संसदीय क्षेत्र<br>
-नौ विधानसभा खंड<br>
-स्वतंत्र नागरिक शोध<br>
-वेबसाइट पूर्वावलोकन उपलब्ध**
-
-### English — tertiary
+### English — primary
 
 **PANJAB 117<br>
 FATEHGARH SAHIB<br>
@@ -38,11 +22,27 @@ Nine Assembly Segments<br>
 Independent Civic Research<br>
 Website Preview Available**
 
+### ਪੰਜਾਬੀ — secondary
+
+**ਪੰਜਾਬ 117<br>
+ਫ਼ਤਿਹਗੜ੍ਹ ਸਾਹਿਬ ਲੋਕ ਸਭਾ ਹਲਕਾ<br>
+ਨੌਂ ਵਿਧਾਨ ਸਭਾ ਹਲਕੇ<br>
+ਸੁਤੰਤਰ ਨਾਗਰਿਕ ਖੋਜ<br>
+ਵੈੱਬਸਾਈਟ ਝਲਕ ਉਪਲਬਧ**
+
+### हिन्दी — tertiary
+
+**पंजाब 117<br>
+फ़तेहगढ़ साहिब संसदीय क्षेत्र<br>
+नौ विधानसभा खंड<br>
+स्वतंत्र नागरिक शोध<br>
+वेबसाइट पूर्वावलोकन उपलब्ध**
+
 Punjabi and Hindi text remains subject to human linguistic approval.
 
 ## Four-slide carousel
 
-1. **Introduction:** approved logo, Punjabi-primary cover headline, small Hindi/English language markers.
+1. **Introduction:** approved logo, English-primary cover headline, small Punjabi/Hindi language markers.
 2. **Accurate scope:** “District: 54 Bassi Pathana (SC), 55 Fatehgarh Sahib, 56 Amloh.” Then: “Parliamentary constituency: nine Assembly segments — 54, 55, 56, 57, 58, 59, 67, 69, 106.”
 3. **What is available:** multilingual project pages and a read-only survey preview. Prominent gold label: “Responses are not being accepted.”
 4. **Action:** “Explore the preview — panjab-117.pages.dev — @panjab.117.” Footer: “Participation dates will be announced after approval.”

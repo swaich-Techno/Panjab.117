@@ -2,18 +2,18 @@
 
 ## Why a patch is needed
 
-The live static site is safely read-only but defaults to English, prioritizes English in its selector, uses an imprecise nine-seat heading and displays an elapsed proposed participation window. Those details can confuse a 5 November public introduction.
+The live static site is safely read-only and already defaults to English, but it uses an imprecise nine-seat heading and displays an elapsed proposed participation window. The local correction retains the English-first language order while fixing those potentially confusing details.
 
 ## Minimal static corrections
 
-- locale priority and root redirect: Punjabi, Hindi, English (`pa`, `hi`, `en`);
+- locale priority and root redirect: English, Punjabi, Hindi (`en`, `pa`, `hi`);
 - accurate heading: “Fatehgarh Sahib Parliamentary Constituency — Nine Assembly Segments”;
 - explicit distinction between Fatehgarh Sahib district (54, 55, 56) and the wider parliamentary constituency (54, 55, 56, 57, 58, 59, 67, 69, 106);
 - removed 5–15 November dates from public survey-preview UI;
 - replacement wording says dates will be confirmed only after privacy, security, consent, backup and operational approval;
 - survey preview remains unavailable, read-only and form-free;
 - mobile header, navigation, title wrapping and language-control focus are strengthened;
-- static-export tests enforce the Punjabi redirect and absence of obsolete dates.
+- static-export tests enforce the English redirect and absence of obsolete dates.
 
 The Punjabi and Hindi corrections are editor drafts, not independently verified translations. They must be approved by named human reviewers before public promotion.
 

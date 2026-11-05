@@ -17,7 +17,7 @@ The public site’s rendered content matches the Step 4C static commit and its b
 
 ### State A — public project preview
 
-The public may read the project introduction, directories and multilingual survey preview. The preview has no form or submission endpoint. The current live site remains online and unchanged. A minimal local release candidate is prepared because the live site defaults to English and still displays the old 5–15 November proposed window.
+The public may read the project introduction, directories and multilingual survey preview. The preview has no form or submission endpoint. The current live site remains online and unchanged. A minimal local release candidate retains English as the default while removing the old 5–15 November proposed window and correcting the Fatehgarh Sahib geography.
 
 ### State B — genuine response collection
 
@@ -25,7 +25,7 @@ The public may read the project introduction, directories and multilingual surve
 
 ## Prepared safely today
 
-- Punjabi is first/default, Hindi second and English third.
+- English is first/default, Punjabi second and Hindi third.
 - The nine-seat scope is named “Fatehgarh Sahib Parliamentary Constituency — Nine Assembly Segments.”
 - The district’s three constituencies are explicitly distinguished from the parliamentary constituency’s nine segments.
 - Obsolete participation dates are removed and replaced with approval-dependent wording.

@@ -19,7 +19,7 @@ After running `npm run build:cloudflare` and `npm run preview:static`, inspect t
 | Punjabi  | `/pa/`   | `/pa/fatehgarh-sahib/`     | `/pa/fatehgarh-sahib/survey/` |
 | Hindi    | `/hi/`   | `/hi/fatehgarh-sahib/`     | `/hi/fatehgarh-sahib/survey/` |
 
-For each route, review the page title, navigation, language selector, geographic description, unavailable-status notice, approval warning, question wording, answer options, consent/privacy wording, validation text, receipt/withdrawal explanation and footer. Confirm that Punjabi is first, Hindi second and English third in the selector.
+For each route, review the page title, navigation, language selector, geographic description, unavailable-status notice, approval warning, question wording, answer options, consent/privacy wording, validation text, receipt/withdrawal explanation and footer. Confirm that English is first, Punjabi second and Hindi third in the selector.
 
 ### Exact source and publication materials
 

@@ -5,8 +5,8 @@ import { dictionaries } from "./translations";
 
 describe("locale configuration", () => {
   it("supports the three declared languages", () => {
-    expect(locales).toEqual(["pa", "hi", "en"]);
-    expect(defaultLocale).toBe("pa");
+    expect(locales).toEqual(["en", "pa", "hi"]);
+    expect(defaultLocale).toBe("en");
     expect(isLocale("pa")).toBe(true);
     expect(isLocale("fr")).toBe(false);
   });

@@ -87,8 +87,8 @@ describe("public preview readiness", () => {
       "utf8",
     );
 
-    expect(cloudflareRedirects).toContain("/ /pa/ 302");
+    expect(cloudflareRedirects).toContain("/ /en/ 302");
     expect(cloudflareRedirects).not.toContain(" 200");
-    expect(staticPreviewServer).toContain('Location: "/pa/"');
+    expect(staticPreviewServer).toContain('Location: "/en/"');
   });
 });

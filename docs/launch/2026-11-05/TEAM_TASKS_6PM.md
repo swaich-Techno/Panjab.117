@@ -14,7 +14,7 @@ If 6:00 PM IST has passed, use these as immediate manual-release tasks and publi
 
 **WhatsApp-ready instruction:**
 
-> Aman: Please prepare the 1080×1350 carousel and 1080×1920 Story/Reel using only the approved Panjab 117 logo and today’s reviewed copy. Punjabi first, Hindi second, English third. Check the nine-segment parliamentary wording, URL, alt text, safe areas and “responses not yet accepted” notice. Schedule/publish only after the project lead confirms the website and gives explicit account authorization. Do not claim the survey is live.
+> Aman: Please prepare the 1080×1350 carousel and 1080×1920 Story/Reel using only the approved Panjab 117 logo and today’s reviewed copy. English first, Punjabi second, Hindi third. Check the nine-segment parliamentary wording, URL, alt text, safe areas and “responses not yet accepted” notice. Schedule/publish only after the project lead confirms the website and gives explicit account authorization. Do not claim the survey is live.
 
 ## Lovejot — promotion
 
