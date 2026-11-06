@@ -3,8 +3,6 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/translations";
 
-import { LanguageSelector } from "./language-selector";
-
 type SiteHeaderProps = {
   dictionary: Dictionary;
   locale: Locale;
@@ -43,7 +41,6 @@ export function SiteHeader({ dictionary: t, locale }: SiteHeaderProps) {
               ))}
             </ul>
           </nav>
-          <LanguageSelector currentLocale={locale} label={t.languageLabel} />
         </div>
       </div>
       <nav

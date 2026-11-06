@@ -49,6 +49,18 @@ const headerRules = parseHeaders(
   await readFile(path.join(outputRoot, "_headers"), "utf8"),
 );
 
+function legacyEnglishRedirect(pathname) {
+  for (const locale of ["pa", "hi"]) {
+    if (pathname === `/${locale}` || pathname === `/${locale}/`) {
+      return "/en/";
+    }
+    if (pathname.startsWith(`/${locale}/`)) {
+      return `/en/${pathname.slice(locale.length + 2)}`;
+    }
+  }
+  return null;
+}
+
 async function resolveFile(pathname) {
   if (pathname === "/_headers" || pathname === "/_redirects") return null;
   const decoded = decodeURIComponent(pathname);
@@ -79,6 +91,12 @@ const server = createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", `http://${request.headers.host}`);
     if (url.pathname === "/") {
       response.writeHead(302, { Location: "/en/" });
+      response.end();
+      return;
+    }
+    const legacyRedirect = legacyEnglishRedirect(url.pathname);
+    if (legacyRedirect) {
+      response.writeHead(301, { Location: `${legacyRedirect}${url.search}` });
       response.end();
       return;
     }

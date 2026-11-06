@@ -2,7 +2,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
 const outputRoot = path.resolve("out");
-const locales = ["en", "pa", "hi"];
+const locales = ["en"];
 const regions = ["majha", "malwa", "doaba", "puadh"];
 const routes = locales.flatMap((locale) => [
   `/${locale}`,
@@ -58,7 +58,13 @@ async function walk(directory) {
   return files;
 }
 
-assert(routes.length === 21, "Expected exactly 21 public preview routes");
+assert(routes.length === 7, "Expected exactly 7 English public preview routes");
+for (const removedLocale of ["pa", "hi"]) {
+  assert(
+    !(await fileExists(routeFile(`/${removedLocale}`))),
+    `Unexpected generated route for ${removedLocale}`,
+  );
+}
 assert(
   await fileExists(path.join(outputRoot, "404.html")),
   "Missing static 404 page",
@@ -92,12 +98,14 @@ for (const route of routes) {
     /<meta name="robots" content="noindex, nofollow"/.test(html),
     `Indexing is not disabled for ${route}`,
   );
-  for (const alternateLocale of locales) {
-    assert(
-      new RegExp(`hreflang="${alternateLocale}"`, "i").test(html),
-      `Missing ${alternateLocale} alternate for ${route}`,
-    );
-  }
+  assert(
+    !/hreflang="(?:pa|hi)"/i.test(html),
+    `Obsolete Punjabi or Hindi alternate found for ${route}`,
+  );
+  assert(
+    !html.includes('id="language-selector"'),
+    `Language selector found in English-only route ${route}`,
+  );
   if (route.endsWith("/survey")) {
     assert(!/<form[\s>]/i.test(html), `Survey form found in ${route}`);
     assert(
@@ -137,6 +145,12 @@ assert(
   redirects.includes("/ /en/ 302"),
   "Root redirect is missing or not temporary",
 );
+for (const locale of ["pa", "hi"]) {
+  assert(
+    redirects.includes(`/${locale}/* /en/:splat 301`),
+    `Missing path-preserving legacy redirect for ${locale}`,
+  );
+}
 
 const headers = await readFile(path.join(outputRoot, "_headers"), "utf8");
 const headerRules = headers

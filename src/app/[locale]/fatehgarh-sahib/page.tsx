@@ -25,7 +25,7 @@ export async function generateMetadata({
     title: `${t.fatehgarhTitle} | Panjab 117`,
     description: t.fatehgarhBody,
     alternates: {
-      languages: localizedAlternates("/fatehgarh-sahib"),
+      canonical: localizedAlternates("/fatehgarh-sahib").en,
     },
   };
 }

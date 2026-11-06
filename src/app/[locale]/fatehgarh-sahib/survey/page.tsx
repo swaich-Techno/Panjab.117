@@ -35,7 +35,7 @@ export async function generateMetadata({
     title: `${t.surveyPreview} | ${t.fatehgarhTitle} | Panjab 117`,
     description: `${t.surveyBody} ${t.noIntake}`,
     alternates: {
-      languages: localizedAlternates("/fatehgarh-sahib/survey"),
+      canonical: localizedAlternates("/fatehgarh-sahib/survey").en,
     },
     robots: {
       index: indexingEnabled,
@@ -120,6 +120,16 @@ export default async function SurveyPreviewPage({ params }: PageProps) {
               {t.noIntake}
             </p>
           </div>
+          <aside className="mt-8 rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-6 text-sm leading-7 text-slate-700">
+            <strong className="text-[#0d2137]">
+              Development collection target, not a cap or statistical claim:
+            </strong>{" "}
+            if collection is independently approved later, the operational goal
+            is at least 500 valid, retained and eligible voluntary responses
+            from each of the nine Assembly segments. Responses above 500 would
+            remain eligible. This is not a random sample, representative poll or
+            election prediction.
+          </aside>
           <SurveyPreview
             consent={notice}
             consentVersion={CONSENT_NOTICE_VERSION}

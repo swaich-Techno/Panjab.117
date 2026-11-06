@@ -153,12 +153,12 @@ export const fatehgarhSahibQuestionnaire = {
       id: "assembly_segment",
       section: "location",
       prompt: text(
-        "Which Assembly segment do you live in or know best?",
+        "Which one Assembly segment do you currently live in?",
         "ਤੁਸੀਂ ਕਿਹੜੇ ਵਿਧਾਨ ਸਭਾ ਹਲਕੇ ਵਿੱਚ ਰਹਿੰਦੇ ਹੋ ਜਾਂ ਕਿਸ ਹਲਕੇ ਨੂੰ ਸਭ ਤੋਂ ਚੰਗੀ ਤਰ੍ਹਾਂ ਜਾਣਦੇ ਹੋ?",
         "आप किस विधानसभा क्षेत्र में रहते हैं या किस क्षेत्र को सबसे अच्छी तरह जानते हैं?",
       ),
       helpText: text(
-        "Choose one of the nine segments in the Fatehgarh Sahib parliamentary constituency.",
+        "Choose exactly one of the nine segments in the Fatehgarh Sahib parliamentary constituency. If you do not currently live in one of them, you are not eligible.",
         "ਫਤਿਹਗੜ੍ਹ ਸਾਹਿਬ ਲੋਕ ਸਭਾ ਹਲਕੇ ਦੇ ਨੌਂ ਵਿਧਾਨ ਸਭਾ ਹਲਕਿਆਂ ਵਿੱਚੋਂ ਇੱਕ ਚੁਣੋ।",
         "फतेहगढ़ साहिब लोकसभा क्षेत्र के नौ विधानसभा क्षेत्रों में से एक चुनें।",
       ),

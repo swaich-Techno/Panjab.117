@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import type { SurveyPreviewCopy } from "@/lib/survey/preview-translations";
 
@@ -16,6 +16,7 @@ export type LocalizedPreviewQuestion = {
 
 export type LocalizedConsentPreview = {
   title: string;
+  eligibility: string;
   voluntary: string;
   purpose: string;
   dataCollected: string;
@@ -31,6 +32,7 @@ export type LocalizedConsentPreview = {
   politicalConsentLabel: string;
   politicalDeclineLabel: string;
   nonRepresentativeNotice: string;
+  coverageBiasNotice: string;
   reviewRequired: string;
 };
 
@@ -63,31 +65,29 @@ export function SurveyPreview({
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [error, setError] = useState("");
 
-  const stages = useMemo<readonly PreviewStage[]>(() => {
-    const civicQuestions = questions.filter(
-      ({ politicalOpinion }) => !politicalOpinion,
-    );
-    const politicalQuestions = questions.filter(
-      ({ politicalOpinion }) => politicalOpinion,
-    );
-    return [
-      { kind: "consent", id: "consent" },
-      ...civicQuestions.map((question) => ({
-        kind: "question" as const,
-        id: question.id,
-        question,
-      })),
-      { kind: "political-consent", id: "political-consent" },
-      ...(politicalConsent === true
-        ? politicalQuestions.map((question) => ({
-            kind: "question" as const,
-            id: question.id,
-            question,
-          }))
-        : []),
-      { kind: "review", id: "review" },
-    ];
-  }, [politicalConsent, questions]);
+  const civicQuestions = questions.filter(
+    ({ politicalOpinion }) => !politicalOpinion,
+  );
+  const politicalQuestions = questions.filter(
+    ({ politicalOpinion }) => politicalOpinion,
+  );
+  const stages: readonly PreviewStage[] = [
+    { kind: "consent", id: "consent" },
+    ...civicQuestions.map((question) => ({
+      kind: "question" as const,
+      id: question.id,
+      question,
+    })),
+    { kind: "political-consent", id: "political-consent" },
+    ...(politicalConsent === true
+      ? politicalQuestions.map((question) => ({
+          kind: "question" as const,
+          id: question.id,
+          question,
+        }))
+      : []),
+    { kind: "review", id: "review" },
+  ];
 
   const stage = stages[Math.min(currentIndex, stages.length - 1)]!;
   const progress = Math.round(((currentIndex + 1) / stages.length) * 100);
@@ -219,6 +219,9 @@ export function SurveyPreview({
             </h2>
             <div className="mt-6 space-y-4 text-sm leading-7 text-slate-700">
               <p>{consent.voluntary}</p>
+              <p className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-4 font-semibold text-[#0d2137]">
+                {consent.eligibility}
+              </p>
               <p>{consent.purpose}</p>
               <p>{consent.dataCollected}</p>
               <p className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-4 font-semibold text-[#0d2137]">
@@ -244,6 +247,7 @@ export function SurveyPreview({
                 </div>
               </details>
               <p>{consent.nonRepresentativeNotice}</p>
+              <p>{consent.coverageBiasNotice}</p>
             </div>
             <label className="mt-7 flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-[#b08d46] bg-[#fffaf0] p-4 font-semibold text-[#0d2137]">
               <input

@@ -7,6 +7,10 @@ export const roles = [
   "privacy_officer",
   "security_officer",
   "backup_operator",
+  "raw_civic_reviewer",
+  "raw_political_reviewer",
+  "survey_export_authorizer",
+  "survey_export_operator",
 ] as const;
 
 export type Role = (typeof roles)[number];
@@ -20,6 +24,10 @@ export const operations = [
   "process_privacy_request",
   "read_security_audit",
   "create_backup",
+  "read_raw_civic_response",
+  "read_raw_political_response",
+  "authorize_survey_export",
+  "export_approved_survey",
 ] as const;
 
 export type Operation = (typeof operations)[number];
@@ -33,6 +41,10 @@ const grants: Readonly<Record<Role, ReadonlySet<Operation>>> = {
   privacy_officer: new Set(["process_privacy_request"]),
   security_officer: new Set(["read_security_audit"]),
   backup_operator: new Set(["create_backup"]),
+  raw_civic_reviewer: new Set(["read_raw_civic_response"]),
+  raw_political_reviewer: new Set(["read_raw_political_response"]),
+  survey_export_authorizer: new Set(["authorize_survey_export"]),
+  survey_export_operator: new Set(["export_approved_survey"]),
 };
 
 export class AccessDeniedError extends Error {

@@ -1,25 +1,30 @@
 # Panjab 117
 
-Panjab 117 is an independent multilingual civic research platform covering all 117 Punjab Legislative Assembly constituencies. The current development branch includes a regional discovery interface and a disabled, synthetic-only survey-readiness proof of concept.
+Panjab 117 is an independent civic research platform covering all 117 Punjab Legislative Assembly constituencies. This integration branch prepares an English-only static public preview and a disabled, synthetic-only survey-readiness proof of concept.
 
 ## Current scope
 
-- English, Punjabi and Hindi locale routes
+- Seven English-only static public routes; historical Punjabi/Hindi work remains in Git history
 - Responsive, accessible editorial homepage
 - Provisional Majha, Malwa, Doaba and Puadh discovery directories, clearly separated from official election boundaries
 - Source-attributed Fatehgarh Sahib parliamentary-to-Assembly mapping
-- Disabled survey schedule plus a multilingual, in-memory Step 4A questionnaire and consent preview
+- Disabled survey schedule plus an English, in-memory questionnaire and consent preview
 - Synthetic withdrawal, keyed duplicate-screening and disclosure-control interfaces
+- Configurable minimum targets of 500 valid retained eligible responses for each
+  of the nine Fatehgarh Sahib parliamentary Assembly segments, without a cap
+- Development-only, authorization-gated synthetic progress projection; no
+  public administrator route
 - Strict TypeScript, Tailwind CSS, ESLint, Prettier and Vitest
 - Automated GitHub quality checks
 - Dependency-free static export prepared for a separately approved Cloudflare
   Pages public preview
 
-No survey submissions, authentication, production database access, payments or administrative tools are implemented. Cultural-region assignments require human review and are not presented as official classifications.
+No public survey submission endpoint, production authentication, production database access, payment or public administrative tool is implemented. Cultural-region assignments require human review and are not presented as official classifications.
 
-The Step 4A questionnaire and consent translations are drafts requiring native
-linguistic and legal review. The proposed survey dates do not override any
-security, privacy, consent, backup or operational gate.
+The English questionnaire and consent remain drafts requiring independent
+English, legal/privacy, methodology and accessibility review. English-only
+recruitment introduces coverage bias. The target date and response target do
+not override any security, privacy, consent, backup or operational gate.
 
 ## Requirements
 
@@ -33,9 +38,9 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000/en`; `/pa` and `/hi` open Punjabi and Hindi. The
-root redirect is a Cloudflare/static-preview rule and is not applied by the
-Next.js development server.
+Open `http://localhost:3000/en`. The root and legacy-language redirects are
+Cloudflare/static-preview rules and are not applied by the Next.js development
+server.
 
 To build and inspect the production-equivalent static output:
 
@@ -54,7 +59,12 @@ npm run format:check
 npm run lint
 npm run typecheck
 npm run test
-npm run build
+npm run test:security:intake
+npm run test:step5c
+npm run test:step5d
+npm run test:step5e
+npm run test:targets
+npm run build:cloudflare
 ```
 
 Copy `.env.example` to `.env.local` only when local configuration becomes necessary. Never commit `.env.local` or place secrets in variables prefixed with `NEXT_PUBLIC_`.
@@ -78,3 +88,15 @@ Copy `.env.example` to `.env.local` only when local configuration becomes necess
 - [Step 4C public-preview release gate](docs/checklists/STEP_4C_PUBLIC_PREVIEW_RELEASE.md)
 - [Step 4C browser and accessibility checks](docs/checklists/STEP_4C_BROWSER_ACCESSIBILITY.md)
 - [Step 4C verification](docs/evidence/STEP_4C_VERIFICATION.md)
+- [English-only site review](docs/readiness/ENGLISH_ONLY_SITE_REVIEW.md)
+- [Website and infrastructure audit](docs/readiness/WEBSITE_AND_INFRASTRUCTURE_AUDIT.md)
+- [Nine constituency targets](docs/readiness/NINE_CONSTITUENCY_TARGETS.md)
+- [4,500-response collection design](docs/readiness/SURVEY_4500_COLLECTION_DESIGN.md)
+- [Valid-submission counting rules](docs/readiness/VALID_SUBMISSION_COUNTING_RULES.md)
+- [Secure submission verification](docs/readiness/SECURE_SUBMISSION_VERIFICATION.md)
+- [Database capacity and recovery](docs/readiness/DATABASE_CAPACITY_AND_RECOVERY.md)
+- [Privacy and consent review](docs/readiness/PRIVACY_AND_CONSENT_REVIEW.md)
+- [Zero-budget hosting decision](docs/readiness/ZERO_BUDGET_HOSTING_DECISION.md)
+- [Public website release check](docs/readiness/PUBLIC_WEBSITE_RELEASE_CHECK.md)
+- [Live collection decision](docs/readiness/LIVE_COLLECTION_GO_NO_GO.md)
+- [Next-day action plan](docs/readiness/NEXT_DAY_ACTION_PLAN.md)

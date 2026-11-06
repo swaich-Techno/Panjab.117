@@ -1,4 +1,4 @@
-import { locales, type Locale } from "./i18n";
+import { locales } from "./i18n";
 import { regions } from "../data/constituencies";
 
 export const publicPreviewRoutes = locales.flatMap((locale) => [
@@ -32,8 +32,6 @@ export function isPublicPreviewIndexingEnabled(
   return value === "true" && getPublicSiteOrigin() !== null;
 }
 
-export function localizedAlternates(path: string): Record<Locale, string> {
-  return Object.fromEntries(
-    locales.map((locale) => [locale, `/${locale}${path}`]),
-  ) as Record<Locale, string>;
+export function localizedAlternates(path: string): Record<"en", string> {
+  return { en: `/en${path}` };
 }

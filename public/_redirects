@@ -1,2 +1,8 @@
 # Cloudflare Pages static redirect replacing the unsupported Next.js Proxy.
 / /en/ 302
+/pa /en/ 301
+/pa/ /en/ 301
+/pa/* /en/:splat 301
+/hi /en/ 301
+/hi/ /en/ 301
+/hi/* /en/:splat 301

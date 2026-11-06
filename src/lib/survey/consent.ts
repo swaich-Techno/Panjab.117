@@ -21,6 +21,7 @@ export type ConsentNotice = {
   version: typeof CONSENT_NOTICE_VERSION;
   translationStatus: "human_linguistic_and_legal_review_required";
   title: LocalizedText;
+  eligibility: LocalizedText;
   voluntary: LocalizedText;
   purpose: LocalizedText;
   dataCollected: LocalizedText;
@@ -36,6 +37,7 @@ export type ConsentNotice = {
   politicalConsentLabel: LocalizedText;
   politicalDeclineLabel: LocalizedText;
   nonRepresentativeNotice: LocalizedText;
+  coverageBiasNotice: LocalizedText;
   reviewRequired: LocalizedText;
 };
 
@@ -46,6 +48,11 @@ export const consentNotice: ConsentNotice = {
     "Participant information and consent",
     "ਭਾਗੀਦਾਰ ਜਾਣਕਾਰੀ ਅਤੇ ਸਹਿਮਤੀ",
     "प्रतिभागी जानकारी और सहमति",
+  ),
+  eligibility: text(
+    "Eligibility for any future approved collection: you must be at least 18 years old, currently live in exactly one of the nine listed Assembly segments, and submit only for yourself. If you do not meet all three conditions, do not participate.",
+    "Eligibility for any future approved collection: you must be at least 18 years old, currently live in exactly one of the nine listed Assembly segments, and submit only for yourself. If you do not meet all three conditions, do not participate.",
+    "Eligibility for any future approved collection: you must be at least 18 years old, currently live in exactly one of the nine listed Assembly segments, and submit only for yourself. If you do not meet all three conditions, do not participate.",
   ),
   voluntary: text(
     "Taking part is voluntary. You may skip optional questions or stop at any time without penalty. Choosing not to participate will not affect any public service, benefit or relationship.",
@@ -93,7 +100,7 @@ export const consentNotice: ConsentNotice = {
     "गोपनीयता संपर्क: लॉन्च से पहले सत्यापित विवरण प्रकाशित करना आवश्यक है। इस पूर्वावलोकन में कोई अनुरोध माध्यम खुला नहीं है।",
   ),
   coreConsentLabel: text(
-    "I have read the participant notice and voluntarily agree to preview the civic questionnaire. I understand that nothing is transmitted or saved.",
+    "I confirm that I am at least 18 and currently live in one listed Assembly segment. I have read the participant notice and voluntarily agree to preview the civic questionnaire. I understand that nothing is transmitted or saved.",
     "ਮੈਂ ਭਾਗੀਦਾਰ ਜਾਣਕਾਰੀ ਪੜ੍ਹ ਲਈ ਹੈ ਅਤੇ ਨਾਗਰਿਕ ਪ੍ਰਸ਼ਨਾਵਲੀ ਦੀ ਝਲਕ ਵੇਖਣ ਲਈ ਸਵੈਛਿਕ ਸਹਿਮਤੀ ਦਿੰਦਾ/ਦਿੰਦੀ ਹਾਂ। ਮੈਂ ਸਮਝਦਾ/ਸਮਝਦੀ ਹਾਂ ਕਿ ਕੁਝ ਵੀ ਭੇਜਿਆ ਜਾਂ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾਂਦਾ।",
     "मैंने प्रतिभागी जानकारी पढ़ ली है और नागरिक प्रश्नावली का पूर्वावलोकन देखने के लिए स्वेच्छा से सहमति देता/देती हूँ। मैं समझता/समझती हूँ कि कुछ भी भेजा या सहेजा नहीं जाता।",
   ),
@@ -122,8 +129,13 @@ export const consentNotice: ConsentNotice = {
     "ਭਵਿੱਖ ਦੇ ਕੋਈ ਵੀ ਨਤੀਜੇ ਸਿਰਫ਼ ਸਵੈਛਿਕ ਜਵਾਬਾਂ ਦਾ ਵਰਣਨ ਕਰਨਗੇ। ਉਨ੍ਹਾਂ ਨੂੰ ਪ੍ਰਤੀਨਿਧਕ ਰਾਏ-ਸਰਵੇਖਣ ਜਾਂ ਚੋਣੀ ਭਵਿੱਖਬਾਣੀ ਵਜੋਂ ਪੇਸ਼ ਨਹੀਂ ਕੀਤਾ ਜਾਣਾ ਚਾਹੀਦਾ।",
     "भविष्य के कोई भी परिणाम केवल स्वैच्छिक उत्तरों का वर्णन करेंगे। उन्हें प्रतिनिधि जनमत सर्वेक्षण या चुनावी भविष्यवाणी के रूप में प्रस्तुत नहीं किया जाना चाहिए।",
   ),
+  coverageBiasNotice: text(
+    "An English-only survey can exclude residents who cannot comfortably read English. Any future report must disclose this coverage bias and must not claim to represent all residents.",
+    "An English-only survey can exclude residents who cannot comfortably read English. Any future report must disclose this coverage bias and must not claim to represent all residents.",
+    "An English-only survey can exclude residents who cannot comfortably read English. Any future report must disclose this coverage bias and must not claim to represent all residents.",
+  ),
   reviewRequired: text(
-    "Draft translation: human linguistic and legal review is required before publication.",
+    "Draft notice: independent English, legal and privacy review is required before publication.",
     "ਮਸੌਦਾ ਅਨੁਵਾਦ: ਪ੍ਰਕਾਸ਼ਨ ਤੋਂ ਪਹਿਲਾਂ ਮਨੁੱਖੀ ਭਾਸ਼ਾਈ ਅਤੇ ਕਾਨੂੰਨੀ ਸਮੀਖਿਆ ਲਾਜ਼ਮੀ ਹੈ।",
     "मसौदा अनुवाद: प्रकाशन से पहले मानवीय भाषाई और कानूनी समीक्षा आवश्यक है।",
   ),

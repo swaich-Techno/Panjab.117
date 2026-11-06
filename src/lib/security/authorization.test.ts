@@ -18,6 +18,10 @@ const expectedOperations: Readonly<Record<Role, readonly Operation[]>> = {
   privacy_officer: ["process_privacy_request"],
   security_officer: ["read_security_audit"],
   backup_operator: ["create_backup"],
+  raw_civic_reviewer: ["read_raw_civic_response"],
+  raw_political_reviewer: ["read_raw_political_response"],
+  survey_export_authorizer: ["authorize_survey_export"],
+  survey_export_operator: ["export_approved_survey"],
 };
 
 describe("server-side RBAC proof of concept", () => {
@@ -54,6 +58,18 @@ describe("server-side RBAC proof of concept", () => {
     ).toThrow("Access denied");
     expect(() =>
       assertAuthorized("backup_operator", "process_privacy_request"),
+    ).toThrow("Access denied");
+  });
+
+  it("keeps civic, political, authorization and export duties separated", () => {
+    expect(() =>
+      assertAuthorized("raw_civic_reviewer", "read_raw_political_response"),
+    ).toThrow("Access denied");
+    expect(() =>
+      assertAuthorized("survey_export_operator", "authorize_survey_export"),
+    ).toThrow("Access denied");
+    expect(() =>
+      assertAuthorized("survey_export_authorizer", "export_approved_survey"),
     ).toThrow("Access denied");
   });
 });

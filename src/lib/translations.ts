@@ -61,7 +61,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     heroEyebrow: "Independent civic research · Punjab",
     heroTitle: "A clearer view of all 117 constituencies.",
     heroBody:
-      "Panjab 117 is an independent, multilingual platform being built to make constituency-level civic research easier to find, understand and question.",
+      "Panjab 117 is an independent civic research platform being built to make constituency-level information easier to find, understand and question.",
     heroPrimary: "Explore regions",
     heroSecondary: "Read our approach",
     identityLabel: "Punjab Legislative Assembly",
@@ -100,7 +100,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       "A future sponsorship programme will use clear boundaries: support will not purchase editorial influence, favourable coverage or access to survey responses.",
     sponsorAction: "Sponsor enquiry coming soon",
     sponsorNote: "No sponsors are represented or implied at this stage.",
-    footerStatement: "Independent multilingual civic research for Punjab.",
+    footerStatement: "Independent civic research for Punjab.",
     privacy: "Privacy",
     contact: "Contact",
     placeholder: "Information coming soon",

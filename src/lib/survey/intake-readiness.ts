@@ -17,6 +17,7 @@ export type ValidatedSyntheticSubmission = {
   locale: Locale;
   idempotencyKey: string;
   privacyScopeToken: string;
+  withdrawalSecret: string;
   minimumAgeConfirmed: true;
   consent: {
     civicParticipation: true;
@@ -75,6 +76,32 @@ function validateOpaqueToken(
     !/^[A-Za-z0-9_-]+$/u.test(value)
   ) {
     issues.push(`${path} must be a 16-128 character URL-safe opaque token`);
+    return "";
+  }
+  return value;
+}
+
+function validateWithdrawalSecret(
+  value: unknown,
+  path: string,
+  issues: string[],
+): string {
+  if (
+    typeof value !== "string" ||
+    value.length < 43 ||
+    value.length > 86 ||
+    !/^[A-Za-z0-9_-]+$/u.test(value)
+  ) {
+    issues.push(`${path} must be a canonical 256-512 bit base64url secret`);
+    return "";
+  }
+  const decoded = Buffer.from(value, "base64url");
+  if (
+    decoded.length < 32 ||
+    decoded.length > 64 ||
+    decoded.toString("base64url") !== value
+  ) {
+    issues.push(`${path} must be a canonical 256-512 bit base64url secret`);
     return "";
   }
   return value;
@@ -142,6 +169,7 @@ export function validateSyntheticSubmission(
       "locale",
       "idempotencyKey",
       "privacyScopeToken",
+      "withdrawalSecret",
       "minimumAgeConfirmed",
       "consent",
       "answers",
@@ -227,6 +255,11 @@ export function validateSyntheticSubmission(
     "submission.privacyScopeToken",
     issues,
   );
+  const withdrawalSecret = validateWithdrawalSecret(
+    input.withdrawalSecret,
+    "submission.withdrawalSecret",
+    issues,
+  );
 
   if (issues.length > 0) throw new IntakeValidationError(issues);
 
@@ -235,6 +268,7 @@ export function validateSyntheticSubmission(
     locale: locale!,
     idempotencyKey,
     privacyScopeToken,
+    withdrawalSecret,
     minimumAgeConfirmed: true,
     consent: {
       civicParticipation: true,

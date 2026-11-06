@@ -9,10 +9,13 @@ import {
 } from "./public-site";
 
 describe("public preview readiness", () => {
-  it("enumerates every multilingual public route without an intake endpoint", () => {
-    expect(publicPreviewRoutes).toHaveLength(21);
-    expect(new Set(publicPreviewRoutes).size).toBe(21);
+  it("enumerates every English-only public route without an intake endpoint", () => {
+    expect(publicPreviewRoutes).toHaveLength(7);
+    expect(new Set(publicPreviewRoutes).size).toBe(7);
     expect(publicPreviewRoutes).toContain("/en/fatehgarh-sahib/survey");
+    expect(
+      publicPreviewRoutes.some((route) => /\/(pa|hi)(\/|$)/u.test(route)),
+    ).toBe(false);
     expect(publicPreviewRoutes.some((route) => route.includes("/api/"))).toBe(
       false,
     );
@@ -88,7 +91,10 @@ describe("public preview readiness", () => {
     );
 
     expect(cloudflareRedirects).toContain("/ /en/ 302");
+    expect(cloudflareRedirects).toContain("/pa/* /en/:splat 301");
+    expect(cloudflareRedirects).toContain("/hi/* /en/:splat 301");
     expect(cloudflareRedirects).not.toContain(" 200");
     expect(staticPreviewServer).toContain('Location: "/en/"');
+    expect(staticPreviewServer).toContain("legacyEnglishRedirect");
   });
 });

@@ -19,6 +19,7 @@ import { InMemoryKeyProvider } from "./fake-key-provider";
 
 const port = Number(process.env.PANJAB_MYSQL_PORT ?? 0);
 const binDirectory = process.env.PANJAB_MYSQL_BIN;
+const mysqlPassword = process.env.PANJAB_MYSQL_PASSWORD;
 const runIntegration = Number.isSafeInteger(port) && port > 0 && binDirectory;
 const mysqlDescribe = runIntegration ? describe : describe.skip;
 
@@ -52,6 +53,9 @@ function runMysqlClient(
       input,
       maxBuffer: 32 * 1024 * 1024,
       windowsHide: true,
+      env: mysqlPassword
+        ? { ...process.env, MYSQL_PWD: mysqlPassword }
+        : process.env,
     },
   );
 
@@ -89,6 +93,7 @@ mysqlDescribe("disposable MySQL 8.4 security integration", () => {
       host: "127.0.0.1",
       port,
       user: "root",
+      password: mysqlPassword,
       multipleStatements: true,
     });
     await root.query(

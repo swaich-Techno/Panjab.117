@@ -38,9 +38,7 @@ export async function generateMetadata({
     title: `${t.siteName} | ${t.heroEyebrow}`,
     description: t.heroBody,
     applicationName: t.siteName,
-    alternates: {
-      languages: Object.fromEntries(locales.map((item) => [item, `/${item}`])),
-    },
+    alternates: { canonical: "/en/" },
     robots: {
       index: indexingEnabled,
       follow: indexingEnabled,
@@ -61,7 +59,7 @@ export default async function LocaleLayout({
   const t = getDictionary(locale);
 
   return (
-    <html lang={locale}>
+    <html lang="en">
       <body>
         <a className="skip-link" href="#main-content">
           {t.skipToContent}

@@ -36,7 +36,7 @@ export async function generateMetadata({
     title: `${t.regions[region].name} | Panjab 117`,
     description: t.directoryBody,
     alternates: {
-      languages: localizedAlternates(`/regions/${region}`),
+      canonical: localizedAlternates(`/regions/${region}`).en,
     },
   };
 }
