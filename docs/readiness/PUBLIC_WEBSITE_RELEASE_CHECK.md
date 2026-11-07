@@ -14,10 +14,18 @@ Release A is distinct from genuine survey collection.
 - [x] Final command results recorded.
 - [x] Desktop/mobile/keyboard engineering review recorded.
 - [x] Corrected static artifact identified and extraction-rehashed.
-- [ ] Independent English wording and accessibility review approved.
+- [ ] Independent English wording review approved.
+- [ ] Human assistive-technology accessibility review approved.
 - [ ] Current Cloudflare production and a verified rollback deployment
       identified.
 - [ ] Separate deployment authorization received.
+
+Cloudflare's GitHub App identifies production deployment
+`100d72ea-b09d-4ac6-a24f-e51fdf5a7b78`, and the public hostname matches its
+immutable content across all seven existing production routes. This deployment
+is the proposed last-known-good rollback baseline for a future release. Direct
+dashboard confirmation that it remains selectable for rollback is still
+pending, so the combined Cloudflare gate remains unchecked.
 
 An owner English-content approval from Harkirat, Panjab 117 Project Lead and
 Research Head, is recorded for commit
@@ -28,15 +36,20 @@ accessibility gate above.
 Until all unchecked items pass, deployment of the changed static artifact is
 NO-GO. This does not affect the already deployed public preview.
 
-The corrected candidate is based on commit
-`a1161628b72e73c8c21e5ab72ed3e46a490534c8`, with public-source diff SHA-256
-`90beb48cc020c871eb4ed1d24079b124c78742d8e89ae9edaea31314ca437a24`.
-Its 60-file artifact-tree SHA-256 is
-`14bacd6e2cef0bc8b83659e50ce8bd6052824bfaa3f2b8b94cf315a2288ba0df`.
+The current candidate is commit
+`58ad5d33251990904de875fb4b02a0c430e1c5fb`. Its 667-file static artifact
+contains 125 public routes and 117 constituency profiles. The canonical
+artifact-tree SHA-256 is
+`02fabbca564b873726a2cdf3c50feeb322fe6f8784a31f76f62015a2729c3605`.
+The distribution ZIP SHA-256 is
+`47d3b8cfc4c118ca28f6b4b33f8922ad49900bcf980a77905ce191c6a6fd4a4a`.
 
-The Cloudflare dashboard presented its normal human-verification challenge.
-No production or rollback deployment ID was inferred, and no Cloudflare
-configuration or deployment was changed.
+The earlier 60-file artifact remains preserved as superseded historical
+evidence; it is not the artifact proposed for this release.
+
+No Cloudflare configuration or production deployment was changed during this
+evidence stage. The current candidate has an automatic branch preview from the
+existing Git integration; it is not a production release authorization.
 
 Release A must never say the survey is open, display synthetic counts as real
 or include intake code. Release A approval cannot authorize Release B.

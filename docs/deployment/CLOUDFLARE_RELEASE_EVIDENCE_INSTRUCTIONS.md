@@ -6,13 +6,16 @@ bypass it, start a deployment or click **Rollback** while gathering evidence.
 
 ## Exact proposed artifact
 
-- Base commit: `a1161628b72e73c8c21e5ab72ed3e46a490534c8`
-- Public-source diff SHA-256:
-  `90beb48cc020c871eb4ed1d24079b124c78742d8e89ae9edaea31314ca437a24`
+- Release commit: `58ad5d33251990904de875fb4b02a0c430e1c5fb`
+- Artifact inventory: 667 files, 12,113,704 bytes
 - Artifact-tree SHA-256:
-  `14bacd6e2cef0bc8b83659e50ce8bd6052824bfaa3f2b8b94cf315a2288ba0df`
+  `02fabbca564b873726a2cdf3c50feeb322fe6f8784a31f76f62015a2729c3605`
+- ZIP: `panjab-117-release-a-final-58ad5d3-02fabbca.zip`
 - ZIP SHA-256:
-  `29498a76030ab61e74b94ed7b1203d83dc87ad33de7930593e3d749274e29d79`
+  `47d3b8cfc4c118ca28f6b4b33f8922ad49900bcf980a77905ce191c6a6fd4a4a`
+
+The earlier 60-file archive remains preserved but is superseded and must not be
+used as evidence for this candidate.
 
 ## Open the legitimate project
 
@@ -49,6 +52,31 @@ details.
 
 A listed successful build is not a verified rollback target until its
 immutable content and headers have been checked.
+
+Read-only evidence already obtained from Cloudflare's authenticated GitHub App
+integration:
+
+- Current production deployment ID:
+  `100d72ea-b09d-4ac6-a24f-e51fdf5a7b78`
+- Current production immutable URL:
+  `https://100d72ea.panjab-117.pages.dev`
+- Current production source:
+  `958c4b37a958dafbf7a83324ed350a49d3cf02ad` on
+  `feat/step-4c-cloudflare-public-preview`
+- Completed: 4 November 2026 at 02:55:12 UTC / 08:25:12 IST
+- Evidence: the Cloudflare check record is the only successful record without a
+  branch-preview URL, and all seven public production route bodies match the
+  immutable deployment byte-for-byte.
+- Proposed rollback baseline after a future Release A deployment: the same
+  current production deployment ID above.
+
+The current candidate also has automatic **branch-preview** deployment
+`b289ab4c-1c10-4b13-be17-6bc44efccf67` at
+`https://b289ab4c.panjab-117.pages.dev`. It is not production and is not evidence
+of deployment authorization.
+
+The dashboard must still confirm that the current production deployment remains
+available as a rollback selection. Do not click **Rollback** while checking.
 
 ## Evidence worksheet
 
