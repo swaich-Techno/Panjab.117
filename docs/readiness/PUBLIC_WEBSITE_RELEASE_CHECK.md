@@ -1,55 +1,49 @@
 # Public website release check
 
-Release A is distinct from genuine survey collection.
+Release A is the English-only static site. It is distinct from genuine survey
+collection.
 
 ## Engineering gate
 
-- [x] English is the only generated public locale.
-- [x] Root redirects to English.
-- [x] Legacy Punjabi/Hindi paths preserve the remaining path when redirecting.
-- [x] Language selector and obsolete alternate metadata are absent.
-- [x] Nine-seat parliamentary scope is distinct from the three-seat district.
-- [x] Survey preview contains no form action, API or persistent response store.
-- [x] Search indexing remains disabled.
-- [x] Final command results recorded.
-- [x] Desktop/mobile/keyboard engineering review recorded.
-- [x] Corrected static artifact identified and extraction-rehashed.
-- [ ] Independent English wording review approved.
-- [ ] Human assistive-technology accessibility review approved.
-- [ ] Current Cloudflare production and a verified rollback deployment
-      identified.
-- [ ] Separate deployment authorization received.
+- [x] Exact source commit and new immutable artifact recorded.
+- [x] PANJAB 117 brand and PUNJAB state spelling verified in rendered content.
+- [x] Root redirects to English; Punjabi/Hindi legacy paths preserve suffixes.
+- [x] All 125 public routes and 117 constituency profiles verified.
+- [x] Nine-seat parliamentary scope remains distinct from the three-seat
+      district.
+- [x] Survey preview has no form action, API or persistent response store.
+- [x] No runtime Functions, production database, external AI or participant
+      storage exists in the static output.
+- [x] Noindex, CSP, HSTS, frame denial and restrictive permissions pass.
+- [x] Browser navigation, keyboard controls, mobile reflow, reduced motion and
+      all eight preview stages pass automated engineering checks.
+- [x] ZIP extraction reproduced the artifact count, bytes and tree hash.
+- [ ] Genuine independent English branding-delta review approved.
+- [ ] Genuine human assistive-technology/accessibility review approved.
+- [ ] Dashboard confirms a selectable last-known-good rollback deployment.
+- [ ] Separate production deployment authorization received.
 
-Cloudflare's GitHub App identifies production deployment
-`100d72ea-b09d-4ac6-a24f-e51fdf5a7b78`, and the public hostname matches its
-immutable content across all seven existing production routes. This deployment
-is the proposed last-known-good rollback baseline for a future release. Direct
-dashboard confirmation that it remains selectable for rollback is still
-pending, so the combined Cloudflare gate remains unchecked.
+## Candidate
 
-An owner English-content approval from Harkirat, Panjab 117 Project Lead and
-Research Head, is recorded for commit
-`e2847f61e6f3672a9b39cb13447b2c1fd7815423`. It is explicitly not an
-independent review and does not close the independent English wording and
-accessibility gate above.
+- Source: `9319c1dcee615fd387e0a5333c366aefb5cd3cda`
+- Files: 667
+- Bytes: 12,640,183
+- Tree SHA-256:
+  `ac32265832d95a71a4de916b165896a6dd337278abfd98ceb45ff34b84671b61`
+- ZIP SHA-256:
+  `0e5655a81d56ecb231af5ee7e59d959b5ba6a8ea1ed3c6e826b121f8322944c3`
 
-Until all unchecked items pass, deployment of the changed static artifact is
-NO-GO. This does not affect the already deployed public preview.
+Harkirat's earlier owner English-content decision is preserved and remains
+explicitly non-independent. It does not certify the new branding delta. No
+complete independent English or human assistive-technology record was found in
+the available project materials.
 
-The current candidate is commit
-`58ad5d33251990904de875fb4b02a0c430e1c5fb`. Its 667-file static artifact
-contains 125 public routes and 117 constituency profiles. The canonical
-artifact-tree SHA-256 is
-`02fabbca564b873726a2cdf3c50feeb322fe6f8784a31f76f62015a2729c3605`.
-The distribution ZIP SHA-256 is
-`47d3b8cfc4c118ca28f6b4b33f8922ad49900bcf980a77905ce191c6a6fd4a4a`.
+Read-only checks show that current production still matches historical
+deployment `100d72ea-b09d-4ac6-a24f-e51fdf5a7b78` on the homepage and does not
+contain the new headline. Reachability is not dashboard rollback proof; an
+authorized operator must confirm that this exact deployment remains selectable
+without initiating rollback.
 
-The earlier 60-file artifact remains preserved as superseded historical
-evidence; it is not the artifact proposed for this release.
-
-No Cloudflare configuration or production deployment was changed during this
-evidence stage. The current candidate has an automatic branch preview from the
-existing Git integration; it is not a production release authorization.
-
-Release A must never say the survey is open, display synthetic counts as real
-or include intake code. Release A approval cannot authorize Release B.
+Until every unchecked item passes, Release A is **NO-GO**. Releases B1 and B2
+remain **NO-GO** regardless of the Release A decision. No push, deployment,
+Cloudflare mutation, collection, AI activation or spending is authorized.
