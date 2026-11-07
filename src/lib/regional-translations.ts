@@ -82,7 +82,7 @@ export const regionalDictionaries: Record<Locale, RegionalDictionary> = {
     surveyEyebrow: "Draft survey readiness · no collection",
     surveyTitle: "Fatehgarh Sahib Parliamentary Constituency survey preview",
     surveyBody:
-      "Participation dates will be set only after privacy, security, consent, backup and operational-readiness approval. This is a read-only preview, not a survey launch announcement.",
+      "This survey is currently a preview. Responses are not being accepted. Participation dates will be announced after the required privacy, security and operational checks are complete.",
     draftStatus: "Draft · approval required",
     unavailable: "Survey intake is unavailable",
     proposedWindow: "Participation dates",

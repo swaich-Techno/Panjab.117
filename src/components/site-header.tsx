@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import type { Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/translations";
 
@@ -8,58 +6,74 @@ type SiteHeaderProps = {
   locale: Locale;
 };
 
-export function SiteHeader({ dictionary: t, locale }: SiteHeaderProps) {
-  const navItems = [
-    ["#constituencies", t.navExplore],
-    ["#survey", t.navSurvey],
-    ["#research", t.navResearch],
-    ["#support", t.navSponsor],
-  ] as const;
+const navigation = [
+  ["/en/#constituencies", "Constituencies"],
+  ["/en/fatehgarh-sahib", "Fatehgarh Sahib"],
+  ["/en/fatehgarh-sahib/survey", "Survey preview"],
+  ["/en/#research", "Research & methodology"],
+  ["/en/#about", "About"],
+] as const;
 
+export function SiteHeader({ dictionary: t }: SiteHeaderProps) {
   return (
     <header className="border-b border-[#d8c9a5] bg-[#f8f4e9]/95">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-4 sm:gap-4 sm:px-8 lg:px-12">
-        <Link
-          className="rounded-sm font-serif text-xl font-bold tracking-tight text-[#0d2137] outline-none focus-visible:ring-2 focus-visible:ring-[#b08d46] focus-visible:ring-offset-4"
-          href={`/${locale}`}
+      <div className="mx-auto flex max-w-[90rem] items-center justify-between gap-5 px-5 py-4 sm:px-8 lg:px-12">
+        <a
+          aria-label={`${t.siteName} home`}
+          className="group rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-[#b08d46] focus-visible:ring-offset-4"
+          href="/en/"
         >
-          {t.siteName}
-          <span className="ml-2 inline-block h-2 w-2 rounded-full bg-[#b08d46]" />
-        </Link>
-        <div className="flex min-w-0 items-center gap-4">
-          <nav aria-label={t.navigationLabel} className="hidden lg:block">
-            <ul className="flex items-center gap-6 text-sm font-semibold text-stone-700">
-              {navItems.map(([href, label]) => (
-                <li key={href}>
-                  <Link
-                    className="rounded-sm underline-offset-4 transition hover:text-emerald-800 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700"
-                    href={`/${locale}${href}`}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <span className="block font-serif text-xl font-bold tracking-[-0.03em] text-[#0d2137] sm:text-2xl">
+            PANJAB <span className="text-[#8b6c2f]">117</span>
+          </span>
+          <span className="hidden text-[0.62rem] font-bold tracking-[0.18em] text-slate-600 uppercase sm:block">
+            Independent civic research
+          </span>
+        </a>
+
+        <nav aria-label="Primary navigation" className="hidden xl:block">
+          <ul className="flex items-center gap-6 text-sm font-semibold text-[#0d2137]">
+            {navigation.map(([href, label]) => (
+              <li key={href}>
+                <a
+                  className="rounded-sm underline-offset-4 transition hover:text-[#8b6c2f] hover:underline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[#b08d46] motion-reduce:transition-none"
+                  href={href}
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <span className="hidden rounded-full border border-[#d8c9a5] bg-white px-3 py-2 text-xs font-bold text-[#7d2d1f] sm:inline-flex">
+            Collection closed
+          </span>
+          <details className="relative xl:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-full border border-[#b08d46] bg-white px-4 text-sm font-bold text-[#0d2137] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#b08d46]">
+              Menu
+            </summary>
+            <nav
+              aria-label="Mobile navigation"
+              className="absolute top-14 right-0 z-50 w-[min(20rem,calc(100vw-2.5rem))] rounded-2xl border border-[#d8c9a5] bg-white p-3 shadow-2xl"
+            >
+              <ul className="grid gap-1">
+                {navigation.map(([href, label]) => (
+                  <li key={href}>
+                    <a
+                      className="block min-h-11 rounded-xl px-4 py-3 text-sm font-bold text-[#0d2137] hover:bg-[#f8f4e9] focus-visible:outline-3 focus-visible:outline-[#b08d46]"
+                      href={href}
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </details>
         </div>
       </div>
-      <nav
-        aria-label={t.navigationLabel}
-        className="border-t border-stone-200 lg:hidden"
-      >
-        <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-x-4 gap-y-1 px-4 py-3 text-sm font-semibold text-stone-700 sm:flex sm:items-center sm:gap-6 sm:px-8">
-          {navItems.map(([href, label]) => (
-            <li key={href}>
-              <Link
-                className="block min-h-8 whitespace-nowrap rounded-sm py-1 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
-                href={`/${locale}${href}`}
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
     </header>
   );
 }

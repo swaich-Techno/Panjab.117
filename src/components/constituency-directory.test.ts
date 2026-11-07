@@ -21,4 +21,12 @@ describe("static constituency directory search", () => {
   it("returns no entries for an unmatched query", () => {
     expect(filterConstituencies(constituencies, "not-a-place")).toEqual([]);
   });
+
+  it("filters the shared record by provisional cultural region", () => {
+    const majha = filterConstituencies(constituencies, "", "majha");
+    expect(majha.length).toBeGreaterThan(0);
+    expect(
+      majha.every(({ proposedRegion }) => proposedRegion === "majha"),
+    ).toBe(true);
+  });
 });

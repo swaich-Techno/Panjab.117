@@ -103,7 +103,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     footerStatement: "Independent civic research for Punjab.",
     privacy: "Privacy",
     contact: "Contact",
-    placeholder: "Information coming soon",
+    placeholder: "Verified details are not yet available in this preview",
     rights: "Foundation phase",
   },
   pa: {

@@ -1,201 +1,159 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
-import type { SurveyPreviewCopy } from "@/lib/survey/preview-translations";
+import { constituencies } from "@/data/constituencies";
+import { fatehgarhSahibSegments } from "@/data/fatehgarh-sahib";
 
-export type LocalizedPreviewQuestion = {
-  id: string;
-  prompt: string;
-  helpText?: string;
-  responseType: "single_choice" | "multiple_choice";
-  required: boolean;
-  politicalOpinion: boolean;
-  options: readonly { id: string; label: string }[];
-};
+type SurveyPreviewProps = { scope: "fatehgarh" | "statewide" };
 
-export type LocalizedConsentPreview = {
-  title: string;
-  eligibility: string;
-  voluntary: string;
-  purpose: string;
-  dataCollected: string;
-  dataNotCollectedInPreview: string;
-  anonymousExplanation: string;
-  identifiableExplanation: string;
-  retention: string;
-  withdrawal: string;
-  privacyContact: string;
-  coreConsentLabel: string;
-  politicalTitle: string;
-  politicalExplanation: string;
-  politicalConsentLabel: string;
-  politicalDeclineLabel: string;
-  nonRepresentativeNotice: string;
-  coverageBiasNotice: string;
-  reviewRequired: string;
-};
+const stages = [
+  "Welcome & eligibility",
+  "Consent",
+  "Constituency",
+  "Civic priorities",
+  "Optional political opinion",
+  "Review",
+  "Completion preview",
+  "Future receipt & withdrawal",
+] as const;
 
-type PreviewStage =
-  | { kind: "consent"; id: "consent" }
-  | { kind: "question"; id: string; question: LocalizedPreviewQuestion }
-  | { kind: "political-consent"; id: "political-consent" }
-  | { kind: "review"; id: "review" };
+const civicPriorities = [
+  "Road infrastructure and public transport",
+  "Healthcare access",
+  "Education and skills",
+  "Employment opportunities",
+  "Agriculture and livelihoods",
+  "Water and sanitation",
+  "Everyday public services",
+  "Another local priority",
+] as const;
 
-type SurveyPreviewProps = {
-  consent: LocalizedConsentPreview;
-  copy: SurveyPreviewCopy;
-  questions: readonly LocalizedPreviewQuestion[];
-  questionnaireVersion: string;
-  consentVersion: string;
-};
-
-export function SurveyPreview({
-  consent,
-  copy,
-  questions,
-  questionnaireVersion,
-  consentVersion,
-}: SurveyPreviewProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [civicConsent, setCivicConsent] = useState(false);
-  const [politicalConsent, setPoliticalConsent] = useState<boolean | null>(
+export function SurveyPreview({ scope }: SurveyPreviewProps) {
+  const searchId = useId();
+  const [stageIndex, setStageIndex] = useState(0);
+  const [adult, setAdult] = useState(false);
+  const [resident, setResident] = useState(false);
+  const [coreConsent, setCoreConsent] = useState(false);
+  const [selectedConstituency, setSelectedConstituency] = useState<
+    number | null
+  >(null);
+  const [query, setQuery] = useState("");
+  const [priorities, setPriorities] = useState<string[]>([]);
+  const [serviceRating, setServiceRating] = useState("");
+  const [politicalChoice, setPoliticalChoice] = useState<"yes" | "no" | null>(
     null,
   );
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [politicalFactor, setPoliticalFactor] = useState("");
   const [error, setError] = useState("");
-
-  const civicQuestions = questions.filter(
-    ({ politicalOpinion }) => !politicalOpinion,
+  const previousStage = useRef(stageIndex);
+  const availableConstituencies =
+    scope === "fatehgarh" ? fatehgarhSahibSegments : constituencies;
+  const filteredConstituencies = useMemo(() => {
+    const normalized = query.trim().toLocaleLowerCase("en");
+    if (!normalized) return availableConstituencies;
+    return availableConstituencies.filter(
+      ({ name, number }) =>
+        name.toLocaleLowerCase("en").includes(normalized) ||
+        String(number).includes(normalized),
+    );
+  }, [availableConstituencies, query]);
+  const selectedRecord = constituencies.find(
+    ({ number }) => number === selectedConstituency,
   );
-  const politicalQuestions = questions.filter(
-    ({ politicalOpinion }) => politicalOpinion,
-  );
-  const stages: readonly PreviewStage[] = [
-    { kind: "consent", id: "consent" },
-    ...civicQuestions.map((question) => ({
-      kind: "question" as const,
-      id: question.id,
-      question,
-    })),
-    { kind: "political-consent", id: "political-consent" },
-    ...(politicalConsent === true
-      ? politicalQuestions.map((question) => ({
-          kind: "question" as const,
-          id: question.id,
-          question,
-        }))
-      : []),
-    { kind: "review", id: "review" },
-  ];
+  const progress = Math.round(((stageIndex + 1) / stages.length) * 100);
 
-  const stage = stages[Math.min(currentIndex, stages.length - 1)]!;
-  const progress = Math.round(((currentIndex + 1) / stages.length) * 100);
-
-  function goBack() {
-    setError("");
-    setCurrentIndex((index) => Math.max(0, index - 1));
-  }
-
-  function validateAndContinue() {
-    if (stage.kind === "consent" && !civicConsent) {
-      setError(copy.consentError);
-      return;
-    }
-    if (
-      stage.kind === "question" &&
-      stage.question.required &&
-      !answers[stage.question.id]
-    ) {
-      setError(copy.segmentError);
-      return;
-    }
-    if (stage.kind === "political-consent" && politicalConsent === null) {
-      setError(copy.politicalChoiceError);
-      return;
-    }
-    setError("");
-    setCurrentIndex((index) => Math.min(stages.length - 1, index + 1));
-  }
-
-  function answerSingle(questionId: string, optionId: string) {
-    setAnswers((current) => ({ ...current, [questionId]: optionId }));
-    setError("");
-  }
-
-  function toggleMultiple(questionId: string, optionId: string) {
-    const existing = Array.isArray(answers[questionId])
-      ? (answers[questionId] as string[])
-      : [];
-    if (!existing.includes(optionId) && existing.length >= 3) {
-      setError(copy.selectionLimit);
-      return;
-    }
-    const next = existing.includes(optionId)
-      ? existing.filter((value) => value !== optionId)
-      : [...existing, optionId];
-    setAnswers((current) => ({ ...current, [questionId]: next }));
-    setError("");
-  }
-
-  function choosePoliticalConsent(value: boolean) {
-    setPoliticalConsent(value);
-    if (!value) {
-      const politicalQuestionIds = new Set(
-        questions
-          .filter(({ politicalOpinion }) => politicalOpinion)
-          .map(({ id }) => id),
-      );
-      setAnswers((current) =>
-        Object.fromEntries(
-          Object.entries(current).filter(
-            ([questionId]) => !politicalQuestionIds.has(questionId),
-          ),
-        ),
-      );
-    }
-    setError("");
-  }
-
-  function skipQuestion() {
-    if (stage.kind !== "question" || stage.question.required) return;
-    setAnswers((current) => {
-      const next = { ...current };
-      delete next[stage.question.id];
-      return next;
+  useEffect(() => {
+    if (previousStage.current === stageIndex) return;
+    previousStage.current = stageIndex;
+    const frame = requestAnimationFrame(() => {
+      document.getElementById("preview-heading")?.focus();
     });
+    return () => cancelAnimationFrame(frame);
+  }, [stageIndex]);
+
+  function validateCurrentStage(): string | null {
+    if (stageIndex === 0 && (!adult || !resident))
+      return "Confirm both eligibility statements to continue.";
+    if (stageIndex === 1 && !coreConsent)
+      return "Confirm the civic-research preview consent to continue.";
+    if (stageIndex === 2 && selectedConstituency === null)
+      return "Choose your current Assembly constituency to continue.";
+    if (stageIndex === 3 && priorities.length === 0)
+      return "Choose at least one local civic priority to continue.";
+    if (stageIndex === 4 && politicalChoice === null)
+      return "Choose whether to include the optional political-opinion preview.";
+    return null;
+  }
+
+  function continuePreview() {
+    const validationError = validateCurrentStage();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     setError("");
-    setCurrentIndex((index) => Math.min(stages.length - 1, index + 1));
+    setStageIndex((current) => Math.min(stages.length - 1, current + 1));
+  }
+
+  function togglePriority(priority: string) {
+    setPriorities((current) => {
+      if (current.includes(priority))
+        return current.filter((item) => item !== priority);
+      if (current.length >= 3) {
+        setError("Choose no more than three civic priorities.");
+        return current;
+      }
+      setError("");
+      return [...current, priority];
+    });
   }
 
   function restart() {
-    setCurrentIndex(0);
-    setCivicConsent(false);
-    setPoliticalConsent(null);
-    setAnswers({});
+    setStageIndex(0);
+    setAdult(false);
+    setResident(false);
+    setCoreConsent(false);
+    setSelectedConstituency(null);
+    setQuery("");
+    setPriorities([]);
+    setServiceRating("");
+    setPoliticalChoice(null);
+    setPoliticalFactor("");
     setError("");
   }
 
   return (
     <section
       aria-labelledby="preview-heading"
-      className="mt-12 overflow-hidden rounded-3xl border border-[#d8c9a5] bg-white shadow-[0_24px_70px_rgba(13,33,55,0.1)]"
+      className="overflow-hidden rounded-[2rem] border border-[#d8c9a5] bg-white shadow-[0_28px_80px_rgba(13,33,55,0.12)]"
     >
       <div className="border-b border-[#d8c9a5] bg-[#fffaf0] p-5 sm:p-7">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs font-bold tracking-[0.14em] text-[#755a25] uppercase">
-            {copy.previewLabel}
-          </p>
-          <p className="text-xs text-slate-600">
-            {copy.step} {currentIndex + 1} {copy.of} {stages.length}
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold tracking-[0.16em] text-[#755a25] uppercase">
+              Interactive design preview
+            </p>
+            <p className="mt-2 text-sm font-semibold text-[#0d2137]">
+              {scope === "fatehgarh"
+                ? "Phase 1 · nine Assembly segments"
+                : "Phase 2 · all 117 Assembly constituencies"}
+            </p>
+          </div>
+          <p
+            aria-atomic="true"
+            aria-live="polite"
+            className="rounded-full bg-[#0d2137] px-4 py-2 text-xs font-bold text-white"
+          >
+            Step {stageIndex + 1} of {stages.length}
           </p>
         </div>
         <div
-          aria-label={copy.progress}
+          aria-label="Questionnaire preview progress"
           aria-valuemax={100}
           aria-valuemin={0}
           aria-valuenow={progress}
-          className="mt-4 h-2 overflow-hidden rounded-full bg-[#e6dcc3]"
+          className="mt-5 h-2 overflow-hidden rounded-full bg-[#e6dcc3]"
           role="progressbar"
         >
           <div
@@ -205,197 +163,497 @@ export function SurveyPreview({
         </div>
       </div>
 
-      <div className="p-5 sm:p-8">
-        {stage.kind === "consent" ? (
+      <div className="p-5 sm:p-8 lg:p-10">
+        <p className="mb-6 w-fit rounded-full border border-[#d8c9a5] bg-[#f8f4e9] px-4 py-2 text-xs font-bold text-[#7d2d1f]">
+          No response leaves this browser tab
+        </p>
+
+        {stageIndex === 0 ? (
           <div>
-            <p className="text-xs font-bold tracking-[0.14em] text-[#8b6c2f] uppercase">
-              {consent.reviewRequired}
+            <p className="text-xs font-bold tracking-[0.14em] text-[#755a25] uppercase">
+              Welcome & eligibility
             </p>
             <h2
-              className="mt-4 font-serif text-3xl font-bold text-[#0d2137]"
+              className="mt-4 scroll-mt-6 font-serif text-3xl font-bold text-[#0d2137] outline-none sm:text-4xl"
               id="preview-heading"
+              tabIndex={-1}
             >
-              {consent.title}
+              A voluntary civic-research preview
             </h2>
-            <div className="mt-6 space-y-4 text-sm leading-7 text-slate-700">
-              <p>{consent.voluntary}</p>
-              <p className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-4 font-semibold text-[#0d2137]">
-                {consent.eligibility}
-              </p>
-              <p>{consent.purpose}</p>
-              <p>{consent.dataCollected}</p>
-              <p className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-4 font-semibold text-[#0d2137]">
-                {consent.dataNotCollectedInPreview}
-              </p>
-              <details className="rounded-2xl border border-slate-300 p-4">
-                <summary className="cursor-pointer font-bold text-[#0d2137]">
-                  {copy.anonymousDetails}
-                </summary>
-                <div className="mt-3 space-y-3">
-                  <p>{consent.anonymousExplanation}</p>
-                  <p>{consent.identifiableExplanation}</p>
-                </div>
-              </details>
-              <details className="rounded-2xl border border-slate-300 p-4">
-                <summary className="cursor-pointer font-bold text-[#0d2137]">
-                  {copy.retentionDetails}
-                </summary>
-                <div className="mt-3 space-y-3">
-                  <p>{consent.retention}</p>
-                  <p>{consent.withdrawal}</p>
-                  <p>{consent.privacyContact}</p>
-                </div>
-              </details>
-              <p>{consent.nonRepresentativeNotice}</p>
-              <p>{consent.coverageBiasNotice}</p>
+            <p className="mt-5 max-w-3xl leading-8 text-slate-700">
+              The proposed survey would ask adult residents about local services
+              and priorities. Participation would be voluntary. This preview
+              stores choices only in temporary component memory and cannot
+              submit them.
+            </p>
+            <div className="mt-7 grid gap-3">
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-300 p-4 font-semibold text-[#0d2137]">
+                <input
+                  checked={adult}
+                  className="mt-1 size-5 accent-[#173a5e]"
+                  onChange={(event) => {
+                    setAdult(event.target.checked);
+                    setError("");
+                  }}
+                  type="checkbox"
+                />
+                <span>I confirm that I am at least 18 years old.</span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-300 p-4 font-semibold text-[#0d2137]">
+                <input
+                  checked={resident}
+                  className="mt-1 size-5 accent-[#173a5e]"
+                  onChange={(event) => {
+                    setResident(event.target.checked);
+                    setError("");
+                  }}
+                  type="checkbox"
+                />
+                <span>
+                  I currently live in{" "}
+                  {scope === "fatehgarh"
+                    ? "one of the nine listed Fatehgarh Sahib parliamentary segments"
+                    : "a Punjab Assembly constituency"}
+                  .
+                </span>
+              </label>
             </div>
-            <label className="mt-7 flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-[#b08d46] bg-[#fffaf0] p-4 font-semibold text-[#0d2137]">
+          </div>
+        ) : null}
+
+        {stageIndex === 1 ? (
+          <div>
+            <p className="text-xs font-bold tracking-[0.14em] text-[#755a25] uppercase">
+              Participant information & consent
+            </p>
+            <h2
+              className="mt-4 scroll-mt-6 font-serif text-3xl font-bold text-[#0d2137] outline-none sm:text-4xl"
+              id="preview-heading"
+              tabIndex={-1}
+            >
+              Understand the proposed use before choosing
+            </h2>
+            <div className="mt-6 grid gap-4 text-sm leading-7 text-slate-700 md:grid-cols-2">
+              <div className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-5">
+                <h3 className="font-bold text-[#0d2137]">
+                  Proposed collection
+                </h3>
+                <p className="mt-2">
+                  Eligibility confirmation, Assembly constituency and
+                  civic-priority responses. Political opinion would require a
+                  separate optional choice.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-5">
+                <h3 className="font-bold text-[#0d2137]">Research limits</h3>
+                <p className="mt-2">
+                  Voluntary recruitment would not create a representative poll,
+                  electoral forecast or statistical guarantee.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-5">
+                <h3 className="font-bold text-[#0d2137]">Privacy gate</h3>
+                <p className="mt-2">
+                  Real intake requires approved retention, withdrawal,
+                  encryption, access, backup, incident-response and
+                  privacy-contact arrangements.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-5">
+                <h3 className="font-bold text-[#0d2137]">Preview boundary</h3>
+                <p className="mt-2">
+                  No endpoint, database, browser storage, analytics tracker or
+                  external AI receives these preview choices.
+                </p>
+              </div>
+            </div>
+            <label className="mt-7 flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-[#b08d46] bg-[#fffaf0] p-5 font-semibold text-[#0d2137]">
               <input
-                checked={civicConsent}
-                className="mt-1 size-5 shrink-0 accent-[#173a5e]"
+                checked={coreConsent}
+                className="mt-1 size-5 accent-[#173a5e]"
                 onChange={(event) => {
-                  setCivicConsent(event.target.checked);
+                  setCoreConsent(event.target.checked);
                   setError("");
                 }}
                 type="checkbox"
               />
-              <span>{consent.coreConsentLabel}</span>
+              <span>
+                I have read this preview notice and choose to continue through
+                the civic questionnaire design.
+              </span>
             </label>
           </div>
         ) : null}
 
-        {stage.kind === "question" ? (
+        {stageIndex === 2 ? (
           <fieldset>
             <legend
-              className="font-serif text-3xl font-bold leading-tight text-[#0d2137]"
+              className="scroll-mt-6 font-serif text-3xl font-bold text-[#0d2137] outline-none sm:text-4xl"
               id="preview-heading"
+              tabIndex={-1}
             >
-              {stage.question.prompt}
+              Which Assembly constituency do you currently live in?
             </legend>
-            <p className="mt-3 text-sm font-semibold text-[#755a25]">
-              {stage.question.required ? copy.required : copy.optional} ·{" "}
-              {stage.question.responseType === "multiple_choice"
-                ? copy.chooseUpToThree
-                : copy.chooseOne}
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
+              Choose exactly one. The list uses official numbers and English
+              names.{" "}
+              {scope === "fatehgarh"
+                ? "Only the nine Phase 1 segments are shown."
+                : "All 117 Punjab Assembly constituencies are shown."}
             </p>
-            {stage.question.helpText ? (
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                {stage.question.helpText}
-              </p>
-            ) : null}
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {stage.question.options.map((option) => {
-                const multiple =
-                  stage.question.responseType === "multiple_choice";
-                const selected = multiple
-                  ? Array.isArray(answers[stage.question.id]) &&
-                    (answers[stage.question.id] as string[]).includes(option.id)
-                  : answers[stage.question.id] === option.id;
-                return (
+            <label
+              className="mt-6 block text-sm font-bold text-[#0d2137]"
+              htmlFor={searchId}
+            >
+              Search constituency name or number
+            </label>
+            <input
+              className="mt-2 min-h-12 w-full rounded-xl border border-slate-400 px-4 text-base outline-none focus-visible:ring-3 focus-visible:ring-[#b08d46]/50"
+              id={searchId}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="For example: Fatehgarh Sahib or 55"
+              type="search"
+              value={query}
+            />
+            <div
+              className="mt-4 max-h-80 overflow-y-auto rounded-2xl border border-slate-300 p-2"
+              role="radiogroup"
+              aria-label="Assembly constituency options"
+            >
+              {filteredConstituencies.length ? (
+                filteredConstituencies.map((entry) => (
                   <label
-                    className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border p-4 font-semibold transition-colors motion-reduce:transition-none ${selected ? "border-[#173a5e] bg-[#eaf1f7] text-[#0d2137]" : "border-slate-300 bg-white text-slate-700 hover:border-[#8b6c2f]"}`}
-                    key={option.id}
+                    className="flex cursor-pointer items-center gap-3 rounded-xl p-3 hover:bg-[#f8f4e9]"
+                    key={entry.number}
                   >
                     <input
-                      checked={selected}
-                      className="size-5 shrink-0 accent-[#173a5e]"
-                      name={stage.question.id}
-                      onChange={() =>
-                        multiple
-                          ? toggleMultiple(stage.question.id, option.id)
-                          : answerSingle(stage.question.id, option.id)
-                      }
-                      type={multiple ? "checkbox" : "radio"}
+                      checked={selectedConstituency === entry.number}
+                      className="size-5 accent-[#173a5e]"
+                      name="constituency"
+                      onChange={() => {
+                        setSelectedConstituency(entry.number);
+                        setError("");
+                      }}
+                      type="radio"
                     />
-                    <span>{option.label}</span>
+                    <span className="font-semibold text-[#0d2137]">
+                      {entry.number} — {entry.name}
+                      {entry.reservedForScheduledCastes ? " (SC)" : ""}
+                    </span>
                   </label>
-                );
-              })}
+                ))
+              ) : (
+                <p className="p-4 text-sm text-slate-700">
+                  No constituency matches that search.
+                </p>
+              )}
             </div>
           </fieldset>
         ) : null}
 
-        {stage.kind === "political-consent" ? (
+        {stageIndex === 3 ? (
+          <div>
+            <h2
+              className="scroll-mt-6 font-serif text-3xl font-bold text-[#0d2137] outline-none sm:text-4xl"
+              id="preview-heading"
+              tabIndex={-1}
+            >
+              Local civic priorities
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-slate-700">
+              Choose up to three areas that should receive attention. This
+              preview does not treat selections as findings.
+            </p>
+            <fieldset className="mt-6">
+              <legend className="font-bold text-[#0d2137]">
+                Priority areas
+              </legend>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {civicPriorities.map((priority) => (
+                  <label
+                    className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 p-4 font-semibold text-slate-800"
+                    key={priority}
+                  >
+                    <input
+                      checked={priorities.includes(priority)}
+                      className="size-5 accent-[#173a5e]"
+                      onChange={() => togglePriority(priority)}
+                      type="checkbox"
+                    />
+                    <span>{priority}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className="mt-8">
+              <legend className="font-bold text-[#0d2137]">
+                Overall access to local public services{" "}
+                <span className="font-normal text-slate-600">(optional)</span>
+              </legend>
+              <div className="mt-3 flex flex-wrap gap-3">
+                {[
+                  "Very good",
+                  "Good",
+                  "Fair",
+                  "Poor",
+                  "Very poor",
+                  "Prefer not to answer",
+                ].map((rating) => (
+                  <label
+                    className="flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold"
+                    key={rating}
+                  >
+                    <input
+                      checked={serviceRating === rating}
+                      className="accent-[#173a5e]"
+                      name="rating"
+                      onChange={() => setServiceRating(rating)}
+                      type="radio"
+                    />
+                    {rating}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+        ) : null}
+
+        {stageIndex === 4 ? (
           <fieldset>
             <legend
-              className="font-serif text-3xl font-bold leading-tight text-[#0d2137]"
+              className="scroll-mt-6 font-serif text-3xl font-bold text-[#0d2137] outline-none sm:text-4xl"
               id="preview-heading"
+              tabIndex={-1}
             >
-              {consent.politicalTitle}
+              Optional political-opinion section
             </legend>
-            <p className="mt-4 leading-7 text-slate-700">
-              {consent.politicalExplanation}
+            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+              Political opinion is separate from the civic questions and never
+              mandatory. No party or candidate directory is presented because
+              candidate status is not being verified for this preview.
             </p>
-            <p className="mt-5 font-semibold text-[#0d2137]">
-              {copy.politicalChoiceTitle}
-            </p>
-            <div className="mt-4 grid gap-3">
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-300 p-4 font-semibold text-[#0d2137]">
+            <div className="mt-6 grid gap-3">
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-300 p-5 font-semibold text-[#0d2137]">
                 <input
-                  checked={politicalConsent === true}
+                  checked={politicalChoice === "yes"}
                   className="mt-1 size-5 accent-[#173a5e]"
-                  name="political-consent"
+                  name="political-choice"
                   onChange={() => {
-                    choosePoliticalConsent(true);
+                    setPoliticalChoice("yes");
+                    setError("");
                   }}
                   type="radio"
                 />
                 <span>
-                  {copy.politicalYes}
-                  <span className="mt-2 block text-sm font-normal text-slate-600">
-                    {consent.politicalConsentLabel}
-                  </span>
+                  Yes, include one neutral political-opinion preview question.
                 </span>
               </label>
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-300 p-4 font-semibold text-[#0d2137]">
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-300 p-5 font-semibold text-[#0d2137]">
                 <input
-                  checked={politicalConsent === false}
+                  checked={politicalChoice === "no"}
                   className="mt-1 size-5 accent-[#173a5e]"
-                  name="political-consent"
+                  name="political-choice"
                   onChange={() => {
-                    choosePoliticalConsent(false);
+                    setPoliticalChoice("no");
+                    setPoliticalFactor("");
+                    setError("");
                   }}
                   type="radio"
                 />
-                <span>
-                  {copy.politicalNo}
-                  <span className="mt-2 block text-sm font-normal text-slate-600">
-                    {consent.politicalDeclineLabel}
-                  </span>
-                </span>
+                <span>No, continue without political-opinion questions.</span>
               </label>
             </div>
+            {politicalChoice === "yes" ? (
+              <div className="mt-7 rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-5">
+                <label
+                  className="block font-bold text-[#0d2137]"
+                  htmlFor="political-factor"
+                >
+                  Which factor matters most when assessing public
+                  representatives?{" "}
+                  <span className="font-normal text-slate-600">(optional)</span>
+                </label>
+                <select
+                  className="mt-3 min-h-12 w-full rounded-xl border border-slate-400 bg-white px-4"
+                  id="political-factor"
+                  onChange={(event) => setPoliticalFactor(event.target.value)}
+                  value={politicalFactor}
+                >
+                  <option value="">Choose an option</option>
+                  <option>Local performance and responsiveness</option>
+                  <option>Policy programme</option>
+                  <option>Candidate experience and conduct</option>
+                  <option>Party record</option>
+                  <option>Undecided</option>
+                  <option>Prefer not to answer</option>
+                </select>
+              </div>
+            ) : null}
           </fieldset>
         ) : null}
 
-        {stage.kind === "review" ? (
-          <div aria-live="polite">
+        {stageIndex === 5 ? (
+          <div>
             <h2
-              className="font-serif text-3xl font-bold text-[#0d2137]"
+              className="scroll-mt-6 font-serif text-3xl font-bold text-[#0d2137] outline-none sm:text-4xl"
               id="preview-heading"
+              tabIndex={-1}
             >
-              {copy.reviewTitle}
+              Review your preview choices
             </h2>
-            <p className="mt-4 max-w-2xl leading-7 text-slate-700">
-              {copy.reviewBody}
+            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+              Nothing has been submitted. Use the edit buttons to return to an
+              earlier screen.
             </p>
-            <p className="mt-5 rounded-2xl border border-[#d8c9a5] bg-[#fffaf0] p-4 font-bold text-[#0d2137]">
-              {copy.answeredCount}:{" "}
-              {
-                Object.values(answers).filter((value) =>
-                  Array.isArray(value) ? value.length > 0 : Boolean(value),
-                ).length
-              }
+            <dl className="mt-7 divide-y divide-slate-200 rounded-2xl border border-[#d8c9a5] bg-[#fffdf7]">
+              {[
+                [
+                  "Eligibility",
+                  adult && resident
+                    ? "Adult resident confirmations selected"
+                    : "Incomplete",
+                  0,
+                ],
+                [
+                  "Consent",
+                  coreConsent ? "Preview consent selected" : "Incomplete",
+                  1,
+                ],
+                [
+                  "Constituency",
+                  selectedRecord
+                    ? `${selectedRecord.number} — ${selectedRecord.name}`
+                    : "Not chosen",
+                  2,
+                ],
+                [
+                  "Civic priorities",
+                  priorities.length ? priorities.join(", ") : "None chosen",
+                  3,
+                ],
+                [
+                  "Political section",
+                  politicalChoice === "yes"
+                    ? politicalFactor || "Included; question not answered"
+                    : "Not included",
+                  4,
+                ],
+              ].map(([label, value, editIndex]) => (
+                <div
+                  className="grid gap-3 p-5 sm:grid-cols-[10rem_1fr_auto] sm:items-center"
+                  key={String(label)}
+                >
+                  <dt className="text-sm font-bold text-[#0d2137]">{label}</dt>
+                  <dd className="text-sm leading-6 text-slate-700">{value}</dd>
+                  <dd>
+                    <button
+                      className="min-h-11 font-bold text-[#173a5e] underline decoration-[#b08d46] decoration-2 underline-offset-4"
+                      onClick={() => setStageIndex(Number(editIndex))}
+                      type="button"
+                    >
+                      Edit
+                    </button>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-6 rounded-2xl border border-[#d8c9a5] bg-white p-5 text-sm leading-7 font-semibold text-[#0d2137]">
+              Continuing only demonstrates the completion design. It does not
+              confirm legal consent, create a participant record or send these
+              choices anywhere.
             </p>
-            <p className="mt-4 text-sm font-bold text-[#9c2f1b]">
-              {copy.noSubmission}
+          </div>
+        ) : null}
+
+        {stageIndex === 6 ? (
+          <div className="text-center">
+            <div
+              className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#e5efe8] text-2xl text-[#1d5c37]"
+              aria-hidden="true"
+            >
+              ✓
+            </div>
+            <h2
+              className="mt-6 scroll-mt-6 font-serif text-3xl font-bold text-[#0d2137] outline-none sm:text-4xl"
+              id="preview-heading"
+              tabIndex={-1}
+            >
+              Questionnaire preview complete
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
+              No real submission was made. No registration number, server
+              receipt or participant record exists. Your choices remain only in
+              this component’s temporary memory until you leave or restart.
             </p>
+            <p className="mx-auto mt-6 max-w-2xl rounded-2xl border border-[#d8c9a5] bg-[#fffaf0] p-5 text-sm font-bold text-[#7d2d1f]">
+              Responses are not currently being accepted.
+            </p>
+          </div>
+        ) : null}
+
+        {stageIndex === 7 ? (
+          <div>
+            <p className="text-xs font-bold tracking-[0.14em] text-[#755a25] uppercase">
+              Synthetic interface specification
+            </p>
+            <h2
+              className="mt-4 scroll-mt-6 font-serif text-3xl font-bold text-[#0d2137] outline-none sm:text-4xl"
+              id="preview-heading"
+              tabIndex={-1}
+            >
+              Future receipt and withdrawal flow
+            </h2>
+            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+              A production system would show a one-time, non-identifying receipt
+              only after a secure server confirms acceptance. This preview
+              intentionally creates no receipt value.
+            </p>
+            <ol className="mt-7 grid gap-4 md:grid-cols-3">
+              <li className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-5">
+                <span className="text-xs font-bold text-[#755a25]">01</span>
+                <h3 className="mt-3 font-bold text-[#0d2137]">
+                  Store receipt safely
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-700">
+                  The participant would receive clear guidance that the project
+                  cannot recover a lost secret.
+                </p>
+              </li>
+              <li className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-5">
+                <span className="text-xs font-bold text-[#755a25]">02</span>
+                <h3 className="mt-3 font-bold text-[#0d2137]">
+                  Request withdrawal
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-700">
+                  A verified privacy channel would accept the receipt without
+                  requesting political answers.
+                </p>
+              </li>
+              <li className="rounded-2xl border border-[#d8c9a5] bg-[#fffdf7] p-5">
+                <span className="text-xs font-bold text-[#755a25]">03</span>
+                <h3 className="mt-3 font-bold text-[#0d2137]">
+                  Confirm outcome
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-700">
+                  The production service would record suppression and provide an
+                  auditable, non-disclosing status.
+                </p>
+              </li>
+            </ol>
+            <div className="mt-7 rounded-2xl border-2 border-dashed border-slate-300 p-6 text-center">
+              <p className="text-xs font-bold tracking-[0.14em] text-slate-600 uppercase">
+                Future receipt area
+              </p>
+              <p className="mt-3 font-mono text-sm text-slate-500">
+                No receipt generated in preview
+              </p>
+            </div>
             <button
               className="button-secondary mt-7"
               onClick={restart}
               type="button"
             >
-              {copy.restart}
+              Clear choices and restart preview
             </button>
           </div>
         ) : null}
@@ -410,41 +668,38 @@ export function SurveyPreview({
           </p>
         ) : null}
 
-        {stage.kind !== "review" ? (
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6">
+        <div className="mt-9 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6">
+          <button
+            className="button-secondary disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={stageIndex === 0}
+            onClick={() => {
+              setError("");
+              setStageIndex((current) => Math.max(0, current - 1));
+            }}
+            type="button"
+          >
+            ← Back
+          </button>
+          {stageIndex < stages.length - 1 ? (
             <button
-              className="button-secondary disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={currentIndex === 0}
-              onClick={goBack}
+              className="button-primary"
+              onClick={continuePreview}
               type="button"
             >
-              ← {copy.back}
+              {stageIndex === 5
+                ? "Show completion preview"
+                : stageIndex === 6
+                  ? "View future receipt flow"
+                  : "Continue"}{" "}
+              <span aria-hidden="true">→</span>
             </button>
-            <div className="flex flex-wrap gap-3">
-              {stage.kind === "question" && !stage.question.required ? (
-                <button
-                  className="min-h-12 px-4 font-bold text-slate-700 underline decoration-[#b08d46] decoration-2 underline-offset-4"
-                  onClick={skipQuestion}
-                  type="button"
-                >
-                  {copy.skip}
-                </button>
-              ) : null}
-              <button
-                className="button-primary"
-                onClick={validateAndContinue}
-                type="button"
-              >
-                {copy.next} →
-              </button>
-            </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
-      <div className="border-t border-[#d8c9a5] bg-[#f6f1e5] px-5 py-3 text-xs text-slate-600 sm:px-8">
-        {copy.questionnaireVersion} {questionnaireVersion} ·{" "}
-        {copy.consentVersion} {consentVersion}
+      <div className="border-t border-[#d8c9a5] bg-[#f6f1e5] px-5 py-4 text-xs leading-5 text-slate-600 sm:px-8">
+        Design prototype · Browser-memory state only · No endpoint · No storage
+        · No external AI
       </div>
     </section>
   );

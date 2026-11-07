@@ -2,18 +2,117 @@ export const regions = ["majha", "malwa", "doaba", "puadh"] as const;
 
 export type Region = (typeof regions)[number];
 
+export const parliamentaryConstituencies = [
+  {
+    number: 1,
+    name: "Gurdaspur",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [1, 2, 3, 4, 5, 6, 7, 9, 10],
+  },
+  {
+    number: 2,
+    name: "Amritsar",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [11, 12, 13, 15, 16, 17, 18, 19, 20],
+  },
+  {
+    number: 3,
+    name: "Khadoor Sahib",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [14, 21, 22, 23, 24, 25, 27, 28, 75],
+  },
+  {
+    number: 4,
+    name: "Jalandhar",
+    reservedForScheduledCastes: true,
+    assemblyConstituencyNumbers: [30, 31, 32, 33, 34, 35, 36, 37, 38],
+  },
+  {
+    number: 5,
+    name: "Hoshiarpur",
+    reservedForScheduledCastes: true,
+    assemblyConstituencyNumbers: [8, 26, 29, 39, 40, 41, 42, 43, 44],
+  },
+  {
+    number: 6,
+    name: "Anandpur Sahib",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [45, 46, 47, 48, 49, 50, 51, 52, 53],
+  },
+  {
+    number: 7,
+    name: "Ludhiana",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [60, 61, 62, 63, 64, 65, 66, 68, 70],
+  },
+  {
+    number: 8,
+    name: "Fatehgarh Sahib",
+    reservedForScheduledCastes: true,
+    assemblyConstituencyNumbers: [54, 55, 56, 57, 58, 59, 67, 69, 106],
+  },
+  {
+    number: 9,
+    name: "Faridkot",
+    reservedForScheduledCastes: true,
+    assemblyConstituencyNumbers: [71, 72, 73, 74, 84, 87, 88, 89, 90],
+  },
+  {
+    number: 10,
+    name: "Firozpur",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [76, 77, 78, 79, 80, 81, 82, 85, 86],
+  },
+  {
+    number: 11,
+    name: "Bathinda",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [83, 91, 92, 93, 94, 95, 96, 97, 98],
+  },
+  {
+    number: 12,
+    name: "Sangrur",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [99, 100, 101, 102, 103, 104, 105, 107, 108],
+  },
+  {
+    number: 13,
+    name: "Patiala",
+    reservedForScheduledCastes: false,
+    assemblyConstituencyNumbers: [109, 110, 111, 112, 113, 114, 115, 116, 117],
+  },
+] as const;
+
+export type ParliamentaryConstituencyNumber =
+  (typeof parliamentaryConstituencies)[number]["number"];
+
 export type Constituency = {
   number: number;
   name: string;
+  slug: string;
   reservedForScheduledCastes: boolean;
+  parliamentaryConstituencyNumber: ParliamentaryConstituencyNumber;
   proposedRegion: Region;
   classificationStatus: "human_review_required";
 };
 
+export function createConstituencySlug(number: number, name: string): string {
+  const normalizedName = name
+    .normalize("NFKD")
+    .toLocaleLowerCase("en")
+    .replace(/[^a-z0-9]+/gu, "-")
+    .replace(/^-|-$/gu, "");
+  return `${number}-${normalizedName}`;
+}
+
 export const constituencySources = {
   officialBoundaries: {
     label: "Election Commission of India, Delimitation Order No. 22",
-    url: "https://www.eci.gov.in/146-archive-delimitation-orders",
+    url: "https://www.eci.gov.in/delimitation/",
+    orderNumber: 22,
+    notificationDate: "2006-06-19",
+    recordVersion: "eci-delimitation-order-22-2006",
+    lastChecked: "2026-11-07",
   },
   threeRegionOverview: {
     label: "Government of Punjab, Know Punjab",
@@ -31,10 +130,21 @@ function constituency(
   proposedRegion: Region,
   reservedForScheduledCastes = false,
 ): Constituency {
+  const parliamentaryConstituency = parliamentaryConstituencies.find(
+    ({ assemblyConstituencyNumbers }) =>
+      assemblyConstituencyNumbers.some((candidate) => candidate === number),
+  );
+  if (!parliamentaryConstituency) {
+    throw new Error(
+      `Missing parliamentary association for Assembly constituency ${number}`,
+    );
+  }
   return {
     number,
     name,
+    slug: createConstituencySlug(number, name),
     reservedForScheduledCastes,
+    parliamentaryConstituencyNumber: parliamentaryConstituency.number,
     proposedRegion,
     classificationStatus: "human_review_required",
   };
@@ -165,6 +275,16 @@ export const constituencies = [
 
 export function getConstituenciesByRegion(region: Region) {
   return constituencies.filter((item) => item.proposedRegion === region);
+}
+
+export function getConstituencyBySlug(slug: string) {
+  return constituencies.find((item) => item.slug === slug);
+}
+
+export function getParliamentaryConstituency(
+  number: ParliamentaryConstituencyNumber,
+) {
+  return parliamentaryConstituencies.find((item) => item.number === number);
 }
 
 export function isRegion(value: string): value is Region {

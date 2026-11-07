@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ConstituencyDirectory } from "@/components/constituency-directory";
@@ -56,16 +55,16 @@ export default async function RegionPage({ params }: RegionPageProps) {
       <main className="min-h-screen bg-[#f8f4e9]" id="main-content">
         <section className="border-b border-[#d8c9a5] bg-[#0d2137] text-white">
           <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
-            <Link
+            <a
               className="text-sm font-bold text-[#e6c56c] underline-offset-4 hover:underline"
               href={`/${locale}`}
             >
               ← {t.backHome}
-            </Link>
+            </a>
             <p className="mt-10 text-xs font-bold tracking-[0.18em] text-[#e6c56c] uppercase">
               {t.directoryEyebrow}
             </p>
-            <h1 className="mt-4 font-serif text-5xl font-bold tracking-tight sm:text-6xl">
+            <h1 className="mt-4 break-words font-serif text-5xl font-bold tracking-tight sm:text-6xl">
               {regionCopy.name} {t.directoryTitle}
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-200">
@@ -91,6 +90,7 @@ export default async function RegionPage({ params }: RegionPageProps) {
               searchPlaceholder: t.searchPlaceholder,
             }}
             entries={entries}
+            locale={locale}
           />
 
           <aside className="mt-12 rounded-2xl border border-[#d8c9a5] bg-white p-6">

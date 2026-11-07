@@ -6,25 +6,74 @@ type SiteFooterProps = {
 
 export function SiteFooter({ dictionary: t }: SiteFooterProps) {
   return (
-    <footer className="border-t border-stone-800 bg-stone-950 text-stone-300">
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 md:grid-cols-[1fr_auto] lg:px-12">
+    <footer className="border-t border-[#284963] bg-[#081625] text-slate-200">
+      <div className="mx-auto grid max-w-[90rem] gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[1.2fr_0.8fr_0.8fr] lg:px-12">
         <div>
-          <p className="font-serif text-2xl font-bold text-white">
-            {t.siteName}
+          <p className="font-serif text-3xl font-bold text-white">
+            PANJAB <span className="text-[#e6c56c]">117</span>
           </p>
-          <p className="mt-3 max-w-md text-sm leading-6 text-stone-400">
-            {t.footerStatement}
+          <p className="mt-4 max-w-lg text-sm leading-7 text-slate-300">
+            {t.footerStatement} This platform is not affiliated with a political
+            party, candidate or government body.
+          </p>
+          <p className="mt-5 text-sm font-bold text-[#e6c56c]">@panjab.117</p>
+        </div>
+        <nav aria-label="Footer navigation">
+          <h2 className="text-xs font-bold tracking-[0.16em] text-[#e6c56c] uppercase">
+            Explore
+          </h2>
+          <ul className="mt-4 space-y-3 text-sm">
+            <li>
+              <a
+                className="hover:text-white hover:underline"
+                href="/en/#constituencies"
+              >
+                All constituencies
+              </a>
+            </li>
+            <li>
+              <a
+                className="hover:text-white hover:underline"
+                href="/en/fatehgarh-sahib"
+              >
+                Fatehgarh Sahib project
+              </a>
+            </li>
+            <li>
+              <a
+                className="hover:text-white hover:underline"
+                href="/en/fatehgarh-sahib/survey"
+              >
+                Survey preview
+              </a>
+            </li>
+            <li>
+              <a
+                className="hover:text-white hover:underline"
+                href="/en/#research"
+              >
+                Methodology
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div>
+          <h2 className="text-xs font-bold tracking-[0.16em] text-[#e6c56c] uppercase">
+            Privacy & contact
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-slate-300">
+            No public privacy or contact service is operational in this preview.
+            No survey responses are accepted or stored.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-x-10 gap-y-2 text-sm">
-          <p className="font-semibold text-white">{t.privacy}</p>
-          <p className="font-semibold text-white">{t.contact}</p>
-          <p className="text-stone-500">{t.placeholder}</p>
-          <p className="text-stone-500">{t.placeholder}</p>
+        <div className="border-t border-slate-700 pt-6 text-xs leading-6 text-slate-300 lg:col-span-3 lg:flex lg:items-center lg:justify-between">
+          <p>
+            © {new Date().getFullYear()} Panjab 117. Independent civic research.
+          </p>
+          <p className="mt-2 lg:mt-0">
+            English-only static preview · Indexing disabled
+          </p>
         </div>
-        <p className="border-t border-stone-800 pt-6 text-xs tracking-wide text-stone-500 md:col-span-2">
-          © {new Date().getFullYear()} {t.siteName} · {t.rights}
-        </p>
       </div>
     </footer>
   );

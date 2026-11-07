@@ -8,10 +8,11 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "build:cloudflare": "npm run build && npm run verify:static",
     "start": "node scripts/serve-static.mjs",
     "preview:static": "node scripts/serve-static.mjs",
+    "verify:browser:design": "node scripts/verify-browser-design.mjs",
     "verify:static": "node scripts/verify-static-export.mjs",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",

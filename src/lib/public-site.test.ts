@@ -10,9 +10,13 @@ import {
 
 describe("public preview readiness", () => {
   it("enumerates every English-only public route without an intake endpoint", () => {
-    expect(publicPreviewRoutes).toHaveLength(7);
-    expect(new Set(publicPreviewRoutes).size).toBe(7);
+    expect(publicPreviewRoutes).toHaveLength(125);
+    expect(new Set(publicPreviewRoutes).size).toBe(125);
     expect(publicPreviewRoutes).toContain("/en/fatehgarh-sahib/survey");
+    expect(publicPreviewRoutes).toContain("/en/survey");
+    expect(
+      publicPreviewRoutes.filter((route) => route.includes("/constituencies/")),
+    ).toHaveLength(117);
     expect(
       publicPreviewRoutes.some((route) => /\/(pa|hi)(\/|$)/u.test(route)),
     ).toBe(false);
@@ -96,5 +100,26 @@ describe("public preview readiness", () => {
     expect(cloudflareRedirects).not.toContain(" 200");
     expect(staticPreviewServer).toContain('Location: "/en/"');
     expect(staticPreviewServer).toContain("legacyEnglishRedirect");
+  });
+
+  it("allows long regional headings to wrap at narrow viewports", () => {
+    const regionPage = readFileSync(
+      new URL("../app/[locale]/regions/[region]/page.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(regionPage).toContain(
+      'className="mt-4 break-words font-serif text-5xl',
+    );
+  });
+
+  it("keeps small footer text above the normal-text contrast threshold", () => {
+    const footer = readFileSync(
+      new URL("../components/site-footer.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(footer).not.toContain("text-slate-500");
+    expect(footer).toContain("text-slate-300");
   });
 });

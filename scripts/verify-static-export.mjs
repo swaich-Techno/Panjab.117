@@ -4,11 +4,14 @@ import path from "node:path";
 const outputRoot = path.resolve("out");
 const locales = ["en"];
 const regions = ["majha", "malwa", "doaba", "puadh"];
+const constituencySlugs = ["1-sujanpur", "2-bhoa", "3-pathankot"];
+const expectedConstituencyRouteCount = 117;
 const routes = locales.flatMap((locale) => [
   `/${locale}`,
   ...regions.map((region) => `/${locale}/regions/${region}`),
   `/${locale}/fatehgarh-sahib`,
   `/${locale}/fatehgarh-sahib/survey`,
+  `/${locale}/survey`,
 ]);
 
 function assert(condition, message) {
@@ -58,7 +61,23 @@ async function walk(directory) {
   return files;
 }
 
-assert(routes.length === 7, "Expected exactly 7 English public preview routes");
+const profileRoot = path.join(outputRoot, "en", "constituencies");
+const profileDirectories = await readdir(profileRoot, { withFileTypes: true });
+const profileRoutes = profileDirectories
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => `/en/constituencies/${entry.name}`);
+assert(
+  profileRoutes.length === expectedConstituencyRouteCount,
+  `Expected ${expectedConstituencyRouteCount} constituency profile routes`,
+);
+for (const slug of constituencySlugs) {
+  assert(
+    profileRoutes.includes(`/en/constituencies/${slug}`),
+    `Missing reference profile ${slug}`,
+  );
+}
+routes.push(...profileRoutes);
+assert(routes.length === 125, "Expected exactly 125 English public routes");
 for (const removedLocale of ["pa", "hi"]) {
   assert(
     !(await fileExists(routeFile(`/${removedLocale}`))),
@@ -113,9 +132,8 @@ for (const route of routes) {
       `Obsolete proposed participation dates found in ${route}`,
     );
     assert(
-      html.includes("fatehgarh-sahib-civic-2026-11-draft-1") &&
-        html.includes("fatehgarh-sahib-consent-2026-11-draft-1"),
-      `Missing versioned preview evidence in ${route}`,
+      html.includes("No endpoint"),
+      `Missing read-only preview evidence in ${route}`,
     );
   }
 

@@ -1,11 +1,13 @@
 import { locales } from "./i18n";
-import { regions } from "../data/constituencies";
+import { constituencies, regions } from "../data/constituencies";
 
 export const publicPreviewRoutes = locales.flatMap((locale) => [
   `/${locale}`,
   ...regions.map((region) => `/${locale}/regions/${region}`),
+  ...constituencies.map(({ slug }) => `/${locale}/constituencies/${slug}`),
   `/${locale}/fatehgarh-sahib`,
   `/${locale}/fatehgarh-sahib/survey`,
+  `/${locale}/survey`,
 ]);
 
 export function getPublicSiteOrigin(

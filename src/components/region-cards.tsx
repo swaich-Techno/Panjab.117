@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { getConstituenciesByRegion, regions } from "@/data/constituencies";
 import type { Locale } from "@/lib/i18n";
 import type { RegionalDictionary } from "@/lib/regional-translations";
@@ -41,13 +39,13 @@ export function RegionCards({ locale, dictionary: t }: RegionCardsProps) {
             <p className="mt-7 text-xs font-bold tracking-[0.1em] text-[#755a25] uppercase">
               {count} {t.provisionalCount}
             </p>
-            <Link
+            <a
               className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#0d2137] px-5 py-2.5 text-sm font-bold text-white outline-none transition hover:bg-[#173a5e] focus-visible:ring-3 focus-visible:ring-[#b08d46] focus-visible:ring-offset-3"
               href={`/${locale}/regions/${region}`}
             >
               {t.exploreRegion}
               <span aria-hidden="true">→</span>
-            </Link>
+            </a>
           </article>
         );
       })}

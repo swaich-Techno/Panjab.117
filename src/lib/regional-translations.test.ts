@@ -22,6 +22,12 @@ describe("regional translations", () => {
     );
   });
 
+  it("states the English preview status without implying a live survey", () => {
+    expect(regionalDictionaries.en.surveyBody).toBe(
+      "This survey is currently a preview. Responses are not being accepted. Participation dates will be announced after the required privacy, security and operational checks are complete.",
+    );
+  });
+
   it.each(locales)(
     "distinguishes the three-seat district from the nine-seat parliamentary constituency in %s",
     (locale) => {

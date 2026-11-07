@@ -29,6 +29,28 @@ body {
     "Nirmala UI",
     sans-serif;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration-thickness: from-font;
+}
+
+button,
+input,
+select,
+summary {
+  font: inherit;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+h1,
+h2,
+h3 {
+  overflow-wrap: anywhere;
 }
 
 :lang(pa) body {
@@ -68,6 +90,11 @@ body {
   outline-offset: 3px;
 }
 
+.constituency-card-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 12rem;
+}
+
 .button-primary,
 .button-secondary {
   display: inline-flex;
@@ -94,6 +121,10 @@ body {
 .button-primary:hover {
   background: #173a5e;
   transform: translateY(-1px);
+}
+
+.button-primary:active {
+  transform: translateY(0);
 }
 
 .button-secondary {
@@ -130,5 +161,12 @@ body {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .button-primary,
+  .button-secondary {
+    border: 2px solid ButtonText;
   }
 }
