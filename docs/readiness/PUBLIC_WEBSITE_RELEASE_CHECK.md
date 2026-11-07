@@ -19,6 +19,12 @@ Release A is distinct from genuine survey collection.
       identified.
 - [ ] Separate deployment authorization received.
 
+An owner English-content approval from Harkirat, Panjab 117 Project Lead and
+Research Head, is recorded for commit
+`e2847f61e6f3672a9b39cb13447b2c1fd7815423`. It is explicitly not an
+independent review and does not close the independent English wording and
+accessibility gate above.
+
 Until all unchecked items pass, deployment of the changed static artifact is
 NO-GO. This does not affect the already deployed public preview.
 
