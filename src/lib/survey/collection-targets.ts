@@ -1,9 +1,14 @@
 import { fatehgarhSahibSegments } from "@/data/fatehgarh-sahib";
+import { constituencies } from "@/data/constituencies";
 
 export const TARGET_VALID_SUBMISSIONS_PER_CONSTITUENCY = 500;
 export const NUMBER_OF_CONSTITUENCIES = 9;
 export const TOTAL_MINIMUM_TARGET =
   TARGET_VALID_SUBMISSIONS_PER_CONSTITUENCY * NUMBER_OF_CONSTITUENCIES;
+export const STATEWIDE_NUMBER_OF_CONSTITUENCIES = constituencies.length;
+export const STATEWIDE_TOTAL_MINIMUM_TARGET =
+  TARGET_VALID_SUBMISSIONS_PER_CONSTITUENCY *
+  STATEWIDE_NUMBER_OF_CONSTITUENCIES;
 export const MAX_SUBMISSIONS_PER_CONSTITUENCY = null;
 
 export const eligibleAssemblySegmentNumbers = fatehgarhSahibSegments.map(
@@ -46,11 +51,11 @@ export function calculateConstituencyProgress(
   assemblySegmentNumber: number,
   counts: SubmissionCounts,
 ): ConstituencyProgress {
-  const segment = fatehgarhSahibSegments.find(
+  const segment = constituencies.find(
     ({ number }) => number === assemblySegmentNumber,
   );
   if (!segment)
-    throw new Error("Assembly segment is outside the approved scope");
+    throw new Error("Assembly segment is outside the 117-constituency scope");
 
   for (const [label, value] of Object.entries(counts)) {
     if (typeof value === "number") assertNonNegativeInteger(value, label);

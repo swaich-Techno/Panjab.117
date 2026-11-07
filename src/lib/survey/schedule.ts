@@ -30,9 +30,9 @@ export type SurveySchedule = {
 
 export const fatehgarhSahibDraftSchedule: SurveySchedule = {
   timeZone: "Asia/Kolkata",
-  localOpening: "2026-11-05 00:00:00",
+  localOpening: "2026-11-10 00:00:00",
   localClosingDisplay: "2026-11-15 23:59:59",
-  opensAt: "2026-11-04T18:30:00.000Z",
+  opensAt: "2026-11-09T18:30:00.000Z",
   closesAtExclusive: "2026-11-15T18:30:00.000Z",
   state: "draft",
   launchApproved: false,

@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { constituencies } from "@/data/constituencies";
 import { fatehgarhSahibSegments } from "@/data/fatehgarh-sahib";
+import { STATE_NAME } from "@/lib/branding";
 
 type SurveyPreviewProps = { scope: "fatehgarh" | "statewide" };
 
@@ -213,7 +214,7 @@ export function SurveyPreview({ scope }: SurveyPreviewProps) {
                   I currently live in{" "}
                   {scope === "fatehgarh"
                     ? "one of the nine listed Fatehgarh Sahib parliamentary segments"
-                    : "a Punjab Assembly constituency"}
+                    : `a ${STATE_NAME} Assembly constituency`}
                   .
                 </span>
               </label>
@@ -299,7 +300,7 @@ export function SurveyPreview({ scope }: SurveyPreviewProps) {
               names.{" "}
               {scope === "fatehgarh"
                 ? "Only the nine Phase 1 segments are shown."
-                : "All 117 Punjab Assembly constituencies are shown."}
+                : `All 117 ${STATE_NAME} Assembly constituencies are shown.`}
             </p>
             <label
               className="mt-6 block text-sm font-bold text-[#0d2137]"

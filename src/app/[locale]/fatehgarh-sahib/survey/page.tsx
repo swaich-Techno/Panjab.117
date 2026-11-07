@@ -4,13 +4,14 @@ import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SurveyPreview } from "@/components/survey-preview";
+import { BRAND_NAME } from "@/lib/branding";
 import { isLocale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/translations";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
 export const metadata: Metadata = {
-  title: "Fatehgarh Sahib survey preview | Panjab 117",
+  title: `Fatehgarh Sahib survey preview | ${BRAND_NAME}`,
   description:
     "A read-only eight-screen English questionnaire design for the nine Fatehgarh Sahib Assembly segments.",
   alternates: { canonical: "/en/fatehgarh-sahib/survey/" },

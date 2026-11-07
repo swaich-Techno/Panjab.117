@@ -1,9 +1,9 @@
 import {
   calculateConstituencyProgress,
-  eligibleAssemblySegmentNumbers,
   type ConstituencyProgress,
   type SubmissionCounts,
 } from "./collection-targets";
+import { collectionPhases, type CollectionPhaseId } from "./collection-phases";
 
 export type AdminProgressPrincipal = {
   authenticated: boolean;
@@ -14,6 +14,7 @@ export type AdminProgressPrincipal = {
 export type AdminProgressDashboard = {
   generatedAt: string;
   syntheticOnly: boolean;
+  phaseId: CollectionPhaseId;
   constituencies: readonly ConstituencyProgress[];
   alerts: readonly string[];
 };
@@ -29,6 +30,7 @@ export function buildAdminProgressDashboard(input: {
   principal: AdminProgressPrincipal;
   generatedAt: string;
   syntheticOnly: boolean;
+  phaseId?: CollectionPhaseId;
   countsBySegment: ReadonlyMap<number, SubmissionCounts>;
 }): AdminProgressDashboard {
   if (
@@ -44,7 +46,9 @@ export function buildAdminProgressDashboard(input: {
     );
   }
 
-  const constituencies = eligibleAssemblySegmentNumbers.map((number) => {
+  const phaseId = input.phaseId ?? "fatehgarh_sahib";
+  const phase = collectionPhases[phaseId];
+  const constituencies = phase.assemblySegmentNumbers.map((number) => {
     const counts = input.countsBySegment.get(number);
     if (!counts)
       throw new Error(`Missing progress counts for segment ${number}`);
@@ -58,6 +62,7 @@ export function buildAdminProgressDashboard(input: {
   return {
     generatedAt: input.generatedAt,
     syntheticOnly: true,
+    phaseId,
     constituencies,
     alerts,
   };

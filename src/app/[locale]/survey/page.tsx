@@ -4,15 +4,15 @@ import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SurveyPreview } from "@/components/survey-preview";
+import { BRAND_NAME, STATE_NAME } from "@/lib/branding";
 import { isLocale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/translations";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
 export const metadata: Metadata = {
-  title: "Punjab 117-constituency survey design | Panjab 117",
-  description:
-    "A read-only statewide survey-interface preview covering all 117 Punjab Assembly constituencies.",
+  title: `${STATE_NAME} 117-constituency survey design | ${BRAND_NAME}`,
+  description: `A read-only statewide survey-interface preview covering all 117 ${STATE_NAME} Assembly constituencies.`,
   alternates: { canonical: "/en/survey/" },
   robots: { index: false, follow: false },
 };
@@ -31,7 +31,7 @@ export default async function StatewideSurveyPage({ params }: PageProps) {
               className="text-sm font-bold text-[#e6c56c] underline-offset-4 hover:underline"
               href="/en/"
             >
-              ← Panjab 117 home
+              ← {BRAND_NAME} home
             </a>
             <p className="mt-10 text-xs font-bold tracking-[0.18em] text-[#e6c56c] uppercase">
               Statewide survey project · read-only design

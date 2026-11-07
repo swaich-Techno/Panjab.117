@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/translations";
+import { BRAND_NUMBER, BRAND_WORD } from "@/lib/branding";
 
 type SiteHeaderProps = {
   dictionary: Dictionary;
@@ -24,7 +25,7 @@ export function SiteHeader({ dictionary: t }: SiteHeaderProps) {
           href="/en/"
         >
           <span className="block font-serif text-xl font-bold tracking-[-0.03em] text-[#0d2137] sm:text-2xl">
-            PANJAB <span className="text-[#8b6c2f]">117</span>
+            {BRAND_WORD} <span className="text-[#8b6c2f]">{BRAND_NUMBER}</span>
           </span>
           <span className="hidden text-[0.62rem] font-bold tracking-[0.18em] text-slate-600 uppercase sm:block">
             Independent civic research

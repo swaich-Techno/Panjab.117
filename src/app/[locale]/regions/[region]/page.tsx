@@ -10,6 +10,7 @@ import {
 } from "@/data/constituencies";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { BRAND_NAME } from "@/lib/branding";
 import { isLocale, locales } from "@/lib/i18n";
 import { localizedAlternates } from "@/lib/public-site";
 import { getRegionalDictionary } from "@/lib/regional-translations";
@@ -32,7 +33,7 @@ export async function generateMetadata({
   if (!isLocale(locale) || !isRegion(region)) return {};
   const t = getRegionalDictionary(locale);
   return {
-    title: `${t.regions[region].name} | Panjab 117`,
+    title: `${t.regions[region].name} | ${BRAND_NAME}`,
     description: t.directoryBody,
     alternates: {
       canonical: localizedAlternates(`/regions/${region}`).en,

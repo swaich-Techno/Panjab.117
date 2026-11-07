@@ -6,6 +6,8 @@ import {
   MAX_SUBMISSIONS_PER_CONSTITUENCY,
   NUMBER_OF_CONSTITUENCIES,
   recordSyntheticValidSubmission,
+  STATEWIDE_NUMBER_OF_CONSTITUENCIES,
+  STATEWIDE_TOTAL_MINIMUM_TARGET,
   targetAllowsAnotherEligibleSubmission,
   TARGET_VALID_SUBMISSIONS_PER_CONSTITUENCY,
   TOTAL_MINIMUM_TARGET,
@@ -20,6 +22,8 @@ describe("nine-constituency collection targets", () => {
     expect(NUMBER_OF_CONSTITUENCIES).toBe(9);
     expect(TARGET_VALID_SUBMISSIONS_PER_CONSTITUENCY).toBe(500);
     expect(TOTAL_MINIMUM_TARGET).toBe(4_500);
+    expect(STATEWIDE_NUMBER_OF_CONSTITUENCIES).toBe(117);
+    expect(STATEWIDE_TOTAL_MINIMUM_TARGET).toBe(58_500);
     expect(MAX_SUBMISSIONS_PER_CONSTITUENCY).toBeNull();
   });
 
@@ -73,5 +77,22 @@ describe("nine-constituency collection targets", () => {
     expect(progress.remaining).toBe(10);
     expect(progress.targetReached).toBe(false);
     expect(progress.intakeHealth).toBe("degraded");
+  });
+
+  it("supports progress reporting for every statewide constituency", () => {
+    const progress = calculateConstituencyProgress(1, {
+      rawReceipts: 1,
+      accepted: 1,
+      validRetainedEligible: 1,
+      pendingReview: 0,
+      duplicate: 0,
+      invalid: 0,
+      withdrawn: 0,
+      excluded: 0,
+      latestSuccessfulProcessingAt: "2026-11-07T10:00:00.000Z",
+      processingFailures: 0,
+    });
+    expect(progress.assemblySegmentName).toBe("Sujanpur");
+    expect(progress.remaining).toBe(499);
   });
 });

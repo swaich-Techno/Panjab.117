@@ -7,13 +7,14 @@ import {
   fatehgarhSahibParliamentaryGroup,
   fatehgarhSahibSegments,
 } from "@/data/fatehgarh-sahib";
+import { BRAND_NAME } from "@/lib/branding";
 import { isLocale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/translations";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
 export const metadata: Metadata = {
-  title: "Fatehgarh Sahib parliamentary project | Panjab 117",
+  title: `Fatehgarh Sahib parliamentary project | ${BRAND_NAME}`,
   description:
     "A read-only research overview of the nine Assembly segments in the Fatehgarh Sahib parliamentary constituency.",
   alternates: { canonical: "/en/fatehgarh-sahib/" },
@@ -35,7 +36,7 @@ export default async function FatehgarhSahibPage({ params }: PageProps) {
               className="text-sm font-bold text-[#e6c56c] underline-offset-4 hover:underline"
               href="/en/"
             >
-              ← Panjab 117 home
+              ← {BRAND_NAME} home
             </a>
             <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem] lg:items-end">
               <div>

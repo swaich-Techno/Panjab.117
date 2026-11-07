@@ -6,6 +6,8 @@ const locales = ["en"];
 const regions = ["majha", "malwa", "doaba", "puadh"];
 const constituencySlugs = ["1-sujanpur", "2-bhoa", "3-pathankot"];
 const expectedConstituencyRouteCount = 117;
+const brandHeadline =
+  "PANJAB 117 — Understanding PUNJAB, Constituency by Constituency";
 const routes = locales.flatMap((locale) => [
   `/${locale}`,
   ...regions.map((region) => `/${locale}/regions/${region}`),
@@ -125,6 +127,24 @@ for (const route of routes) {
     !html.includes('id="language-selector"'),
     `Language selector found in English-only route ${route}`,
   );
+  const brandingAuditHtml = html.replaceAll(
+    "Government of Punjab, Know Punjab",
+    "Government source attribution",
+  );
+  assert(
+    !/\bPanjab 117\b|\bPunjab\b/u.test(brandingAuditHtml),
+    `Legacy public branding or geographic spelling found in ${route}`,
+  );
+  if (route === "/en") {
+    assert(html.includes(brandHeadline), "Missing permanent brand headline");
+    for (const metadata of [
+      'property="og:title"',
+      'property="og:site_name"',
+      'name="twitter:title"',
+    ]) {
+      assert(html.includes(metadata), `Missing brand metadata: ${metadata}`);
+    }
+  }
   if (route.endsWith("/survey")) {
     assert(!/<form[\s>]/i.test(html), `Survey form found in ${route}`);
     assert(

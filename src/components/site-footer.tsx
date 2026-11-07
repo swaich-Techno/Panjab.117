@@ -1,4 +1,5 @@
 import type { Dictionary } from "@/lib/translations";
+import { BRAND_NAME, BRAND_NUMBER, BRAND_WORD } from "@/lib/branding";
 
 type SiteFooterProps = {
   dictionary: Dictionary;
@@ -10,7 +11,7 @@ export function SiteFooter({ dictionary: t }: SiteFooterProps) {
       <div className="mx-auto grid max-w-[90rem] gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[1.2fr_0.8fr_0.8fr] lg:px-12">
         <div>
           <p className="font-serif text-3xl font-bold text-white">
-            PANJAB <span className="text-[#e6c56c]">117</span>
+            {BRAND_WORD} <span className="text-[#e6c56c]">{BRAND_NUMBER}</span>
           </p>
           <p className="mt-4 max-w-lg text-sm leading-7 text-slate-300">
             {t.footerStatement} This platform is not affiliated with a political
@@ -68,7 +69,8 @@ export function SiteFooter({ dictionary: t }: SiteFooterProps) {
         </div>
         <div className="border-t border-slate-700 pt-6 text-xs leading-6 text-slate-300 lg:col-span-3 lg:flex lg:items-center lg:justify-between">
           <p>
-            © {new Date().getFullYear()} Panjab 117. Independent civic research.
+            © {new Date().getFullYear()} {BRAND_NAME}. Independent civic
+            research.
           </p>
           <p className="mt-2 lg:mt-0">
             English-only static preview · Indexing disabled

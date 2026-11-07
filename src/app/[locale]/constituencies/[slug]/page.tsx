@@ -9,6 +9,7 @@ import {
   getConstituencyBySlug,
   getParliamentaryConstituency,
 } from "@/data/constituencies";
+import { BRAND_NAME, STATE_NAME } from "@/lib/branding";
 import { isLocale, locales } from "@/lib/i18n";
 import { getDictionary } from "@/lib/translations";
 
@@ -34,8 +35,8 @@ export async function generateMetadata({
   const constituency = getConstituencyBySlug(slug);
   if (!isLocale(locale) || !constituency) return {};
   return {
-    title: `${constituency.number} ${constituency.name} | Panjab 117`,
-    description: `Verified public-reference profile for Punjab Assembly constituency ${constituency.number}, ${constituency.name}.`,
+    title: `${constituency.number} ${constituency.name} | ${BRAND_NAME}`,
+    description: `Verified public-reference profile for ${STATE_NAME} Assembly constituency ${constituency.number}, ${constituency.name}.`,
     alternates: { canonical: `/en/constituencies/${constituency.slug}/` },
   };
 }
@@ -65,7 +66,7 @@ export default async function ConstituencyProfilePage({ params }: PageProps) {
               ← All constituencies
             </a>
             <p className="mt-10 text-xs font-bold tracking-[0.18em] text-[#e6c56c] uppercase">
-              Punjab Assembly constituency {constituency.number}
+              {STATE_NAME} Assembly constituency {constituency.number}
             </p>
             <h1 className="mt-4 break-words font-serif text-5xl font-bold tracking-[-0.035em] sm:text-7xl">
               {constituency.name}

@@ -45,13 +45,13 @@ describe("survey scheduling guard", () => {
     expect(
       getSurveyAvailability(
         approvedOpenSchedule,
-        new Date("2026-11-04T18:29:59.999Z"),
+        new Date("2026-11-09T18:29:59.999Z"),
       ).intakeEnabled,
     ).toBe(false);
     expect(
       getSurveyAvailability(
         approvedOpenSchedule,
-        new Date("2026-11-04T18:30:00.000Z"),
+        new Date("2026-11-09T18:30:00.000Z"),
       ).intakeEnabled,
     ).toBe(true);
     expect(

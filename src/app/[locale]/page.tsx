@@ -6,6 +6,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { constituencies } from "@/data/constituencies";
+import { BRAND_HEADLINE, BRAND_NAME, STATE_NAME } from "@/lib/branding";
 import { isLocale } from "@/lib/i18n";
 import { getRegionalDictionary } from "@/lib/regional-translations";
 import { getDictionary } from "@/lib/translations";
@@ -55,15 +56,15 @@ export default async function HomePage({ params }: HomePageProps) {
           <div className="relative mx-auto grid max-w-[90rem] gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:px-12 lg:py-28">
             <div>
               <p className="text-xs font-bold tracking-[0.2em] text-[#755a25] uppercase">
-                Independent civic research · Punjab
+                Independent civic research · {STATE_NAME}
               </p>
               <h1 className="mt-6 max-w-5xl text-balance font-serif text-5xl leading-[1.02] font-bold tracking-[-0.045em] text-[#0d2137] sm:text-6xl lg:text-7xl">
-                Panjab 117 — Understanding Punjab, Constituency by Constituency
+                {BRAND_HEADLINE}
               </h1>
               <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-700 sm:text-xl">
                 Independent civic research, constituency information and a
                 transparent approach to understanding local priorities across
-                Punjab.
+                {STATE_NAME}.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <a className="button-primary" href="#constituencies">
@@ -88,7 +89,7 @@ export default async function HomePage({ params }: HomePageProps) {
             <div className="relative mx-auto w-full max-w-lg">
               <div className="rounded-[2.25rem] bg-[#0d2137] p-7 text-white shadow-[0_28px_80px_rgba(13,33,55,0.25)] sm:p-10">
                 <p className="text-xs font-bold tracking-[0.18em] text-[#e6c56c] uppercase">
-                  Punjab Legislative Assembly
+                  {STATE_NAME} Legislative Assembly
                 </p>
                 <p className="mt-7 font-serif text-[7rem] leading-none font-bold tracking-[-0.08em] text-white sm:text-[9rem]">
                   117
@@ -216,7 +217,7 @@ export default async function HomePage({ params }: HomePageProps) {
               light
               eyebrow="Research & methodology"
               title="Credibility begins with visible limits."
-              body="Panjab 117 is designed to make sources, assumptions, participant protections and uncertainty legible before any findings are published."
+              body={`${BRAND_NAME} is designed to make sources, assumptions, participant protections and uncertainty legible before any findings are published.`}
             />
             <ol className="mt-14 grid gap-px overflow-hidden rounded-3xl border border-slate-700 bg-slate-700 md:grid-cols-2 xl:grid-cols-5">
               {methods.map(([number, title, body]) => (
@@ -238,7 +239,7 @@ export default async function HomePage({ params }: HomePageProps) {
           <div className="mx-auto grid max-w-[90rem] gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-12 lg:py-24">
             <div>
               <p className="text-xs font-bold tracking-[0.18em] text-[#755a25] uppercase">
-                About Panjab 117
+                About {BRAND_NAME}
               </p>
               <h2 className="mt-4 font-serif text-4xl font-bold text-[#0d2137]">
                 Independent by design.
@@ -246,9 +247,9 @@ export default async function HomePage({ params }: HomePageProps) {
             </div>
             <div className="space-y-5 text-base leading-8 text-slate-700">
               <p>
-                Panjab 117 is an independent civic-research project covering
-                every Punjab Legislative Assembly constituency. It does not
-                endorse political parties, candidates or governments.
+                {BRAND_NAME} is an independent civic-research project covering
+                every {STATE_NAME} Legislative Assembly constituency. It does
+                not endorse political parties, candidates or governments.
               </p>
               <p>
                 The platform currently publishes a read-only research preview.

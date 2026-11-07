@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { BRAND_NAME, STATE_NAME } from "./branding";
 
 export type Dictionary = {
   siteName: string;
@@ -50,7 +51,7 @@ export type Dictionary = {
 
 export const dictionaries: Record<Locale, Dictionary> = {
   en: {
-    siteName: "Panjab 117",
+    siteName: BRAND_NAME,
     skipToContent: "Skip to main content",
     navigationLabel: "Primary navigation",
     navExplore: "Constituencies",
@@ -58,13 +59,12 @@ export const dictionaries: Record<Locale, Dictionary> = {
     navResearch: "Research",
     navSponsor: "Sponsor enquiry",
     languageLabel: "Language",
-    heroEyebrow: "Independent civic research · Punjab",
+    heroEyebrow: `Independent civic research · ${STATE_NAME}`,
     heroTitle: "A clearer view of all 117 constituencies.",
-    heroBody:
-      "Panjab 117 is an independent civic research platform being built to make constituency-level information easier to find, understand and question.",
+    heroBody: `${BRAND_NAME} is an independent civic research platform being built to make constituency-level information easier to find, understand and question.`,
     heroPrimary: "Explore regions",
     heroSecondary: "Read our approach",
-    identityLabel: "Punjab Legislative Assembly",
+    identityLabel: `${STATE_NAME} Legislative Assembly`,
     identityValue: "117",
     identityCaption: "constituencies · one shared public record",
     exploreEyebrow: "Constituency exploration",
@@ -100,7 +100,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       "A future sponsorship programme will use clear boundaries: support will not purchase editorial influence, favourable coverage or access to survey responses.",
     sponsorAction: "Sponsor enquiry coming soon",
     sponsorNote: "No sponsors are represented or implied at this stage.",
-    footerStatement: "Independent civic research for Punjab.",
+    footerStatement: `Independent civic research for ${STATE_NAME}.`,
     privacy: "Privacy",
     contact: "Contact",
     placeholder: "Verified details are not yet available in this preview",
