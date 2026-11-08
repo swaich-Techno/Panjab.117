@@ -5,7 +5,7 @@ Candidate source: `9319c1dcee615fd387e0a5333c366aefb5cd3cda`
 | Gate                                            | Status                                       | Evidence or missing decision                                                                           |
 | ----------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | Exact source identity                           | Verified                                     | Local commit above on isolated branch                                                                  |
-| Static artifact frozen                          | Verified                                     | 667 files; tree SHA-256 `ac32265832d95a71a4de916b165896a6dd337278abfd98ceb45ff34b84671b61`             |
+| Static artifact frozen                          | Verified                                     | 667 files; tree SHA-256 `a698703f23ded502fd417203208609fd8ed0b79c1408c24e2fbb8cf3e9400c53`             |
 | ZIP extraction rehash                           | Verified                                     | ZIP SHA-256 `0e5655a81d56ecb231af5ee7e59d959b5ba6a8ea1ed3c6e826b121f8322944c3`; extracted tree matched |
 | 125 routes / 117 profiles                       | Verified                                     | Static verifier passed; 3,622 internal references checked                                              |
 | Branding and metadata                           | Verified technically                         | Rendered PANJAB/PUNJAB guard and browser checks passed                                                 |

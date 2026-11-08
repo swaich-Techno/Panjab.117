@@ -10,7 +10,7 @@ Evidence date: 7 November 2026.
 - Artifact files: 667
 - Artifact bytes: 12,640,183
 - Canonical artifact-tree SHA-256:
-  `ac32265832d95a71a4de916b165896a6dd337278abfd98ceb45ff34b84671b61`
+  `a698703f23ded502fd417203208609fd8ed0b79c1408c24e2fbb8cf3e9400c53`
 - Distribution ZIP bytes: 2,938,080
 - ZIP SHA-256:
   `0e5655a81d56ecb231af5ee7e59d959b5ba6a8ea1ed3c6e826b121f8322944c3`
@@ -20,6 +20,18 @@ path, a NUL byte, the file bytes and a final NUL byte. The ZIP was extracted to
 a separate verification directory; the extraction contained the same 667
 files, 12,640,183 bytes and tree hash. The temporary extraction directory was
 then removed. Older artifacts were not modified.
+
+An evidence-only verification on 8 November 2026 corrected the earlier draft
+tree value `ac322658...`, which had been calculated with Windows backslashes
+despite the stated forward-slash procedure. The artifact and ZIP were not
+changed. A fresh extraction of the unchanged ZIP produced the canonical value
+above; the ZIP SHA-256 also remained unchanged.
+
+A fresh verification build on 8 November 2026 produced the same 667 files and
+12,640,183 bytes, but Next.js generated a different 21-character build ID.
+After replacing the old and new build IDs with one neutral token in file paths
+and file contents, all 667 files matched. This confirms there was no source or
+page-content mismatch; the frozen artifact remains the release evidence.
 
 ## Static and browser verification
 
