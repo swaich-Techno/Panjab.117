@@ -4,3 +4,4 @@ coverage
 outputs
 work
 package-lock.json
+automation/google-sheets/*.gs

@@ -11,6 +11,7 @@ import {
 } from "@/data/constituencies";
 import { BRAND_NAME, STATE_NAME } from "@/lib/branding";
 import { isLocale, locales } from "@/lib/i18n";
+import { getPublishedCandidateRecords } from "@/lib/research/candidate-source-registry";
 import { getDictionary } from "@/lib/translations";
 
 type PageProps = { params: Promise<{ locale: string; slug: string }> };
@@ -52,6 +53,7 @@ export default async function ConstituencyProfilePage({ params }: PageProps) {
   if (!parliamentary) notFound();
   const previous = constituencies[constituency.number - 2];
   const next = constituencies[constituency.number];
+  const candidateRecords = getPublishedCandidateRecords(constituency.number);
 
   return (
     <>
@@ -149,6 +151,49 @@ export default async function ConstituencyProfilePage({ params }: PageProps) {
                 No local issue, representative, candidate, election result or
                 survey finding is published here without a verified source and
                 editorial review.
+              </p>
+            </section>
+
+            <section className="rounded-3xl border border-[#d8c9a5] bg-white p-7 sm:p-9">
+              <p className="text-xs font-bold tracking-[0.16em] text-[#755a25] uppercase">
+                Candidate announcements and nomination status
+              </p>
+              {candidateRecords.length === 0 ? (
+                <h2 className="mt-4 font-serif text-3xl font-bold text-[#0d2137]">
+                  No verified candidate announcement available.
+                </h2>
+              ) : (
+                <ul className="mt-4 space-y-4">
+                  {candidateRecords.map((record) => (
+                    <li
+                      className="rounded-2xl border border-[#d8c9a5] p-5"
+                      key={`${record.candidateName}-${record.sourceUrl}`}
+                    >
+                      <h2 className="font-serif text-2xl font-bold text-[#0d2137]">
+                        {record.candidateName}
+                      </h2>
+                      <p className="mt-2 text-sm text-slate-700">
+                        {record.partyName} ·{" "}
+                        {record.status.replaceAll("_", " ")}
+                      </p>
+                      <a
+                        className="mt-3 inline-flex font-bold text-[#173a5e] underline decoration-[#b08d46] decoration-2 underline-offset-4"
+                        href={record.sourceUrl}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        Review source ↗
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-4 leading-8 text-slate-700">
+                A name will appear only after its source, constituency, party or
+                independent status, and announcement or nomination
+                classification receive human editorial review. A party
+                announcement is not presented as an official final contesting
+                candidate list.
               </p>
             </section>
 
