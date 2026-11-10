@@ -22,6 +22,7 @@
     "test:step5d": "vitest run src/lib/survey/secure-intake.test.ts src/lib/survey/intake-http-service.test.ts src/lib/survey/mysql-migration.test.ts src/lib/survey/trusted-approval-evidence.test.ts src/lib/security/testing/audit-outbox.test.ts src/lib/security/testing/screening-cleanup.test.ts",
     "test:step5e": "vitest run src/lib/staging",
     "test:targets": "vitest run src/lib/survey/collection-targets.test.ts src/lib/survey/admin-progress.test.ts",
+    "test:google-sheets-sync": "node automation/google-sheets/test_sync.mjs",
     "test:security:mysql": "vitest run src/lib/security/mysql.integration.test.ts src/lib/security/step5b-mysql.integration.test.ts --maxWorkers=1 --no-file-parallelism",
     "staging:step5e": "node scripts/serve-step5e-staging.mjs",
     "test:watch": "vitest",
